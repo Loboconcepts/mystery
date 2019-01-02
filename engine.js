@@ -13,7 +13,7 @@ function preventZoom(e) {
 
 
 var worldArray;
-var currentLocation = 3;
+var currentLocation = 2;
 var moves = 0;
 var viewOrient = "BACK";
 var zAxis = ["UP","E","DOWN","W"];	
@@ -27,7 +27,7 @@ var pitchAxis;
 var um;
 var fm;
 var lm;
-var x = 6;
+var x = 12;
 var y = x*x;
 var z = 1;
 
@@ -36,8 +36,11 @@ var z = 1;
 
 function generateWorld() {
 	worldArray = [];
+	let f=-1;
 	for (i=0;i<(x*x);i++) {
-		worldArray.push(i.toString(36));
+		f++;
+		if (f>35) {f=0};
+		worldArray.push(f.toString(36));
 	};
 	worldArray = worldArray.join("");
 };
@@ -96,13 +99,7 @@ function cubePositioning(direction, topfacing, pos, orient) {
 function getWorldArrayPosition(whatPosition) {
 	if (whatPosition > worldArray.length) {return (whatPosition - worldArray.length);}
 	else if (whatPosition < 1) {return (whatPosition + worldArray.length);}
-	else {return (whatPosition);}
-};
-
-function getWorldArrayIndexPosition(whatPosition) {
-	if (whatPosition > worldArray.length) {return worldArray[(whatPosition - worldArray.length)-1];}
-	else if (whatPosition < 1) {return worldArray[(whatPosition + worldArray.length)-1];}
-	else {return worldArray[(whatPosition-1)];	}
+	else {return whatPosition;};
 };
 
 
@@ -181,8 +178,7 @@ function LOGIC_movement() {
 function drawingWhat() {
 	var whatArray = [];
 	// back left, back right, back middle, middle left, middle right, middle center, front center
-	whatArray.push(getWorldArrayIndexPosition(currentLocation + 2*fm - lm),getWorldArrayIndexPosition(currentLocation + 2*fm + lm),getWorldArrayIndexPosition(currentLocation + 2*fm),getWorldArrayIndexPosition(currentLocation + fm - lm),getWorldArrayIndexPosition(currentLocation + fm + lm),getWorldArrayIndexPosition(currentLocation + fm),getWorldArrayIndexPosition(currentLocation))
-	console.log(whatArray);
+	whatArray.push(worldArray[getWorldArrayPosition(currentLocation + 2*fm - lm)],worldArray[getWorldArrayPosition(currentLocation + 2*fm + lm)],worldArray[getWorldArrayPosition(currentLocation + 2*fm)],worldArray[getWorldArrayPosition(currentLocation + fm - lm)],worldArray[getWorldArrayPosition(currentLocation + fm + lm)],worldArray[getWorldArrayPosition(currentLocation + fm)],worldArray[getWorldArrayPosition(currentLocation)]);
 	return whatArray;
 }
 
@@ -203,34 +199,83 @@ canvas.style.maxHeight = "500px";
 var ctx = canvas.getContext("2d");
 // dataUrl = canvas.toDataURL();
 
-function drawWall() {
+
+// Draws the individual box art, doesn't place, just draws.
+function drawPosition(pos) {
 	ctx.beginPath();
-	ctx.moveTo(0,0);
-	ctx.lineTo(250,250);
-	ctx.lineTo(250,750);
-	ctx.lineTo(0,1000);
+	ctx.fillStyle = "rgba(0,0,0,.3)"
+	ctx.fillRect(0,0,1000,1000);
+	ctx.strokeStyle = "#000000";
+	ctx.strokeRect(0,0,1000,1000);
+
+	ctx.font = "1500px Courier";
+	ctx.fillText(pos, 0, 1000);
+
 	ctx.closePath();
-	ctx.fillStyle = "#000000"
-	ctx.fill();
-}
+};
 
 
+// Renders the box contents at the appropriate size and placement. See drawPosition for individual box art.
+function renderAllBoxes() {
+	ctx.clearRect(0,0,1000,1000);
+	var allObjects = drawingWhat();
+	for (var i=0;i<allObjects.length;i++) {
+		ctx.save();
+		switch (i) {
+			case 0:
+				ctx.translate(125,375);
+				ctx.scale(.25,.25);
 
-ctx.scale(.5,.5)
+			break;
+			case 2:
+				ctx.translate(375,375)
+				ctx.scale(.25,.25);
+			break;
+			case 1:
+				ctx.translate(625,375)
+				ctx.scale(.25,.25);
+			break;
+			case 3:
+				ctx.translate(-250,250)
+				ctx.scale(.5,.5);
+			break;
+			case 5:
+				ctx.translate(250,250)
+				ctx.scale(.5,.5);
+			break;
+			case 4:
+				ctx.translate(750,250)
+				ctx.scale(.5,.5);
+			break;
+			default:
+				ctx.scale(1,1);
+			break;
 
-drawWall();
+		}
+		drawPosition(allObjects[i]);
+		ctx.restore();
+	};
+};
 
-// var canvasPosition = {
-//     canvas:     '',
-//     ctx:        '',
-//     height:     0,
-//     width:      0,
-//     position:   '',
-//     backScale: [.75,.75],
-//     // back left, back right, back middle, middle left, middle right, middle center, front center
-//     draw : function(position,)
+var FPS = 60;
 
+function DISPLAY_movement() {
+	let c=[0,0,0];
+	let animation = setInterval(function() {
+		c[0]=c[0]+1;
+		c[1]=c[1]+(500/60);
+		c[2]=c[2]+(1/60);
+		ctx.save();
+		
+		// ctx.scale(1+c[2],1+c[2]);
+		// ctx.translate(-c[1],-c[1]);
+		ctx.setTransform(1+c[2],0,0,1+c[2],-c[1],-c[1]);
+		renderAllBoxes();
 
-// }
+		ctx.restore();
+		// if (c[0]==30) LOGIC_movement();
 
+		if (c[0]>60) clearInterval(animation),LOGIC_movement(),renderAllBoxes();
+	}, 1000/FPS);
+};
 
