@@ -16,7 +16,7 @@ var worldArray;
 var currentLocation = 3;
 var moves = 0;
 var viewOrient = "BACK";
-var zAxis = ["UP","E","DOWN","W"];
+var zAxis = ["UP","E","DOWN","W"];	
 var yAxis = ["N","E","S","W"];
 var xAxis = ["UP","S","DOWN","N"];
 var direction = "N";
@@ -27,7 +27,7 @@ var pitchAxis;
 var um;
 var fm;
 var lm;
-var x = 3;
+var x = 6;
 var y = x*x;
 var z = 1;
 
@@ -36,8 +36,8 @@ var z = 1;
 
 function generateWorld() {
 	worldArray = [];
-	for (i=0;i<(x*x*x);i++) {
-		worldArray.push("1");
+	for (i=0;i<(x*x);i++) {
+		worldArray.push(i.toString(36));
 	};
 	worldArray = worldArray.join("");
 };
@@ -163,6 +163,29 @@ function LOGIC_rotate(rAxes, lr) {
 	cubePositioning(direction, topfacing, currentLocation, viewOrient);
 };
 
+function LOGIC_movement() {
+	switch (direction) {
+		case "N":currentLocation = currentLocation - x;break;
+		case "S":currentLocation = currentLocation + x;break;
+		case "E":currentLocation = currentLocation + z;break;
+		case "W":currentLocation = currentLocation - z;break;
+		case "UP":currentLocation = currentLocation - y;break;
+		case "DOWN":currentLocation = currentLocation + y;break;
+		default: console.log("OK");
+	}
+	if (currentLocation > worldArray.length) {currentLocation = (currentLocation - worldArray.length);}
+	else if (currentLocation < 1) {currentLocation = (currentLocation + worldArray.length);}
+	else {currentLocation = (currentLocation);};
+}
+
+function drawingWhat() {
+	var whatArray = [];
+	// back left, back right, back middle, middle left, middle right, middle center, front center
+	whatArray.push(getWorldArrayIndexPosition(currentLocation + 2*fm - lm),getWorldArrayIndexPosition(currentLocation + 2*fm + lm),getWorldArrayIndexPosition(currentLocation + 2*fm),getWorldArrayIndexPosition(currentLocation + fm - lm),getWorldArrayIndexPosition(currentLocation + fm + lm),getWorldArrayIndexPosition(currentLocation + fm),getWorldArrayIndexPosition(currentLocation))
+	console.log(whatArray);
+	return whatArray;
+}
+
 // ############ DISPLAY ################ //
 
 // Canvas
@@ -179,3 +202,35 @@ canvas.style.height = "auto";
 canvas.style.maxHeight = "500px";
 var ctx = canvas.getContext("2d");
 // dataUrl = canvas.toDataURL();
+
+function drawWall() {
+	ctx.beginPath();
+	ctx.moveTo(0,0);
+	ctx.lineTo(250,250);
+	ctx.lineTo(250,750);
+	ctx.lineTo(0,1000);
+	ctx.closePath();
+	ctx.fillStyle = "#000000"
+	ctx.fill();
+}
+
+
+
+ctx.scale(.5,.5)
+
+drawWall();
+
+// var canvasPosition = {
+//     canvas:     '',
+//     ctx:        '',
+//     height:     0,
+//     width:      0,
+//     position:   '',
+//     backScale: [.75,.75],
+//     // back left, back right, back middle, middle left, middle right, middle center, front center
+//     draw : function(position,)
+
+
+// }
+
+
