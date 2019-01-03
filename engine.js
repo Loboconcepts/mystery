@@ -57,11 +57,11 @@ function generateWorld() {
 		// f++;
 		// if (f>35) {f=0};
 		// worldArray.push(f.toString(36));
-		worldArray.push("0");
+		worldArray.push("2");
 
 	};
-	// worldArray = worldArray.join("");
-	worldArray = "22222000000222222000000222220000022222000"
+	worldArray = worldArray.join("");
+	// worldArray = "22222000000222222000000222220000022222000"
 };
 
 function axisFinder() {
@@ -346,7 +346,9 @@ var wall = {
 		this.ctx.lineTo(wallType[4],wallType[5]);
 		this.ctx.lineTo(wallType[6],wallType[7]);
 		this.ctx.fill();
-		this.bricks(wallType);
+
+		// THIS DESTROYS THE CPU USAGE
+		// this.bricks(wallType);
 		this.ctx.closePath();
 	},
 	bricks   : function(wallType) {
@@ -424,7 +426,7 @@ var wall = {
 							var x1 = i1;
 							var b1 = pp1+wallType[1];
 							y1 = (m1*x1)+b1
-							console.log(y1)
+							// console.log(y1)
 
 							var y2;
 							var m2 = ((pp2+((wallType[5]-wallType[3])/brickLines)+wallType[3])-(pp1+((wallType[7]-wallType[1])/brickLines)+wallType[1]))/wallType[2]-wallType[0];
