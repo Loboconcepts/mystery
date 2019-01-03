@@ -27,10 +27,26 @@ var pitchAxis;
 var um;
 var fm;
 var lm;
-var x = 12;
+var x = 5;
 var y = x*x;
 var z = 1;
 
+
+
+// ############### sin cos Math below ############ //
+		// x1 = 500;
+		// y1 = 500;
+		// r =  1000;
+		// ctx.moveTo(x1, y1);
+		// ctx.lineTo(x1 + r * Math.cos(Math.PI/4), y1 + r * Math.sin(Math.PI/4));
+		// ctx.moveTo(x1, y1);
+		// ctx.lineTo(x1 + r * Math.cos(-Math.PI/4), y1 + r * Math.sin(-Math.PI/4));
+		// ctx.moveTo(x1, y1);
+		// ctx.lineTo(x1 + r * Math.cos(-Math.PI/.8), y1 + r * Math.sin(-Math.PI/.8));
+		// ctx.moveTo(x1, y1);
+		// ctx.lineTo(x1 + r * Math.cos(Math.PI/.8), y1 + r * Math.sin(Math.PI/.8));
+		
+		// ctx.stroke();
 
 // ################### LOGIC ################## //
 
@@ -38,11 +54,14 @@ function generateWorld() {
 	worldArray = [];
 	let f=-1;
 	for (i=0;i<(x*x);i++) {
-		f++;
-		if (f>35) {f=0};
-		worldArray.push(f.toString(36));
+		// f++;
+		// if (f>35) {f=0};
+		// worldArray.push(f.toString(36));
+		worldArray.push("0");
+
 	};
-	worldArray = worldArray.join("");
+	// worldArray = worldArray.join("");
+	worldArray = "22222000000222222000000222220000022222000"
 };
 
 function axisFinder() {
@@ -175,6 +194,7 @@ function LOGIC_movement() {
 	else {currentLocation = (currentLocation);};
 }
 
+// get view positions. Back three, middle three, front
 function drawingWhat() {
 	var whatArray = [];
 	// back left, back right, back middle, middle left, middle right, middle center, front center
@@ -200,23 +220,46 @@ var ctx = canvas.getContext("2d");
 // dataUrl = canvas.toDataURL();
 
 
+
+
 // Draws the individual box art, doesn't place, just draws.
-function drawPosition(pos) {
+function drawPosition(pos,transparency) {
 	ctx.beginPath();
-	ctx.fillStyle = "rgba(0,0,0,.3)"
+	
+
+	switch (pos) {
+		case "0":
+			wall.draw(ctx,wall.ceiling,"#0000ff");
+			wall.draw(ctx,wall.floor,"#0000ff");
+			break;
+		case "2":
+			switch(direction) {
+				case "N": case "S":
+					wall.draw(ctx,wall.ceiling,"#0000ff");
+					wall.draw(ctx,wall.floor,"#0000ff");
+					wall.draw(ctx,wall.left,"#00ff00");
+					wall.draw(ctx,wall.right,"#00ff00");
+					
+					break;
+				case "E": case "W":
+					wall.draw(ctx,wall.front,"#00ff00");
+					break;
+			};
+			
+		break;
+		default: 
+			ctx.font = "1500px Courier";
+			ctx.fillText(pos, 0, 1000);
+		break;
+	};
+	ctx.fillStyle = "rgba(0,0,0,"+transparency+")";
 	ctx.fillRect(0,0,1000,1000);
-	ctx.strokeStyle = "#000000";
-	ctx.strokeRect(0,0,1000,1000);
-
-	ctx.font = "1500px Courier";
-	ctx.fillText(pos, 0, 1000);
-
+	
 	ctx.closePath();
 };
 
-
 // Renders the box contents at the appropriate size and placement. See drawPosition for individual box art.
-function renderAllBoxes() {
+function DISPLAY_renderAllBoxes(tran) {
 	ctx.clearRect(0,0,1000,1000);
 	var allObjects = drawingWhat();
 	for (var i=0;i<allObjects.length;i++) {
@@ -225,7 +268,6 @@ function renderAllBoxes() {
 			case 0:
 				ctx.translate(125,375);
 				ctx.scale(.25,.25);
-
 			break;
 			case 2:
 				ctx.translate(375,375)
@@ -252,7 +294,7 @@ function renderAllBoxes() {
 			break;
 
 		}
-		drawPosition(allObjects[i]);
+		drawPosition(allObjects[i],tran);
 		ctx.restore();
 	};
 };
@@ -260,22 +302,53 @@ function renderAllBoxes() {
 var FPS = 60;
 
 function DISPLAY_movement() {
-	let c=[0,0,0];
+	let c=[0,0,0,0];
 	let animation = setInterval(function() {
 		c[0]=c[0]+1;
 		c[1]=c[1]+(500/60);
 		c[2]=c[2]+(1/60);
+		c[3]=c[3]+.0025;
 		ctx.save();
 		
 		// ctx.scale(1+c[2],1+c[2]);
 		// ctx.translate(-c[1],-c[1]);
 		ctx.setTransform(1+c[2],0,0,1+c[2],-c[1],-c[1]);
-		renderAllBoxes();
+		DISPLAY_renderAllBoxes(.3-c[3]);
 
 		ctx.restore();
 		// if (c[0]==30) LOGIC_movement();
 
-		if (c[0]>60) clearInterval(animation),LOGIC_movement(),renderAllBoxes();
+		if (c[0]>60) clearInterval(animation),LOGIC_movement(),DISPLAY_renderAllBoxes(.3);
 	}, 1000/FPS);
 };
+
+// ############### ART ################### //
+
+var vanishingPoint = [500,500];
+
+var wall = {
+	left    : [0,0,250,250,250,750,0,1000],
+	right   : [1000,0,750,250,750,750,1000,1000],
+	ceiling : [0,0,0,250,1000,250,1000,0],
+	floor   : [0,1000,0,750,1000,750,1000,1000],
+	front   : [0,0,1000,0,1000,1000,0,1000],
+
+	draw    : function(ctx,wallType,fill) {
+		this.ctx = ctx;
+		this.ctx.beginPath();
+		this.ctx.fillStyle=fill;
+		this.ctx.moveTo(wallType[0],wallType[1]);
+		this.ctx.lineTo(wallType[2],wallType[3]);
+		this.ctx.lineTo(wallType[4],wallType[5]);
+		this.ctx.lineTo(wallType[6],wallType[7]);
+		this.ctx.fill();
+		this.ctx.closePath();
+	}
+}
+
+// ############# CONTROLS ############## // 
+function CONTROL_turnRight() {
+	LOGIC_rotate("YAW", 1);
+	DISPLAY_renderAllBoxes(.3)
+}
 
