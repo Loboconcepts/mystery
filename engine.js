@@ -230,15 +230,15 @@ function drawPosition(pos,transparency) {
 	switch (pos) {
 		case "0":
 			wall.draw(ctx,wall.ceiling,"#0000ff");
-			wall.draw(ctx,wall.floor,"#0000ff");
+			wall.draw(ctx,wall.floor,"#00ff00");
 			break;
 		case "2":
 			switch(direction) {
 				case "N": case "S":
 					wall.draw(ctx,wall.ceiling,"#0000ff");
-					wall.draw(ctx,wall.floor,"#0000ff");
-					wall.draw(ctx,wall.left,"#00ff00");
-					wall.draw(ctx,wall.right,"#00ff00");
+					wall.draw(ctx,wall.floor,"#00FF00");
+					wall.draw(ctx,wall.left,"#ff0000");
+					wall.draw(ctx,wall.right,"#ff0000");
 					
 					break;
 				case "E": case "W":
@@ -326,6 +326,10 @@ function DISPLAY_movement() {
 
 var vanishingPoint = [500,500];
 
+
+
+
+
 var wall = {
 	left    : [0,0,250,250,250,750,0,1000],
 	right   : [1000,0,750,250,750,750,1000,1000],
@@ -342,7 +346,132 @@ var wall = {
 		this.ctx.lineTo(wallType[4],wallType[5]);
 		this.ctx.lineTo(wallType[6],wallType[7]);
 		this.ctx.fill();
+		this.bricks(wallType);
 		this.ctx.closePath();
+	},
+	bricks   : function(wallType) {
+		var brickLines = 12;
+		var pp1 = 0;
+		var pp2 = 0;
+		if (wallType == wall.left || wallType == wall.right || wallType == wall.front) {
+			for (var i=0;i<brickLines;i++) {
+				this.ctx.strokeStyle = "#ffffff";
+				this.ctx.lineWidth = 4;
+				this.ctx.moveTo(wallType[0],pp1+wallType[1]);
+				this.ctx.lineTo(wallType[2],pp2+wallType[3]);
+				if (wallType == wall.left || wallType == wall.front) {
+					if (i%2==0) {
+						var i1=0;
+						var i2 = 10;
+						var i3 = 0;
+						while (i3<5) {
+							var y1;
+							var m1 = ((pp2+wallType[3])-(pp1+wallType[1]))/wallType[2]-wallType[0];
+							var x1 = i1;
+							var b1 = pp1+wallType[1];
+							y1 = (m1*x1)+b1
+
+							var y2;
+							var m2 = ((pp2+((wallType[5]-wallType[3])/brickLines)+wallType[3])-(pp1+((wallType[7]-wallType[1])/brickLines)+wallType[1]))/wallType[2]-wallType[0];
+							var x2 = i1;
+							var b2 = pp1+((wallType[7]-wallType[1])/brickLines);+wallType[1];
+							y2 = (m2*x2)+b2
+
+							this.ctx.moveTo(i1,y1);
+							this.ctx.lineTo(i1,y2);
+							i1 = i1+80-i2;
+							i2 = i2+7;
+							i3++;
+						};
+					}
+					else {
+						var i1 = 25;
+						var i2 = 10;
+						var i3 = 0;	
+						while (i3<4) {
+							var y1;
+							var m1 = ((pp2+wallType[3])-(pp1+wallType[1]))/wallType[2]-wallType[0];
+							var x1 = i1;
+							var b1 = pp1+wallType[1];
+							y1 = (m1*x1)+b1
+
+							var y2;
+							var m2 = ((pp2+((wallType[5]-wallType[3])/brickLines)+wallType[3])-(pp1+((wallType[7]-wallType[1])/brickLines)+wallType[1]))/wallType[2]-wallType[0];
+							var x2 = i1;
+							var b2 = pp1+((wallType[7]-wallType[1])/brickLines);+wallType[1];
+							y2 = (m2*x2)+b2
+
+							this.ctx.moveTo(i1,y1);
+							this.ctx.lineTo(i1,y2);
+							i1 = i1+80-i2;
+							i2 = i2+5;
+							i3++;
+						};
+					};
+				}
+
+				// THIS NEEDS TO BE INVERTED BECAUSE Y=MX+B, B = Y WHEN X=0. 
+				// NEVER EQUALS 0 ON RIGHT SIDE OF CANVAS. 
+				// NEED TO FIGURE OUT HOW TO SIMULATE X CROSSING THE LEFT SIDE OF CANVAS (WHICH IS 0) TO FIGURE OUT Y. 
+				else if (wallType == wall.right) {
+					if (i%2==0) {
+						var i1=0;
+						var i2 = 10;
+						var i3 = 0;
+						while (i3<5) {
+							var y1;
+							var m1 = ((pp2+wallType[3])-(pp1+wallType[1]))/wallType[2]-wallType[0];
+							var x1 = i1;
+							var b1 = pp1+wallType[1];
+							y1 = (m1*x1)+b1
+							console.log(y1)
+
+							var y2;
+							var m2 = ((pp2+((wallType[5]-wallType[3])/brickLines)+wallType[3])-(pp1+((wallType[7]-wallType[1])/brickLines)+wallType[1]))/wallType[2]-wallType[0];
+							var x2 = i1;
+							var b2 = pp1+((wallType[7]-wallType[1])/brickLines);+wallType[1];
+							y2 = (m2*x2)+b2
+
+							this.ctx.moveTo(i1,y1);
+							this.ctx.lineTo(i1,y2);
+							i1 = i1+80-i2;
+							i2 = i2+7;
+							i3++;
+						};
+					}
+					else {
+						var i1 = 25;
+						var i2 = 10;
+						var i3 = 0;	
+						while (i3<4) {
+							var y1;
+							var m1 = ((pp2+wallType[3])-(pp1+wallType[1]))/wallType[2]-wallType[0];
+							var x1 = i1;
+							var b1 = pp1+wallType[1];
+							y1 = (m1*x1)+b1
+
+							var y2;
+							var m2 = ((pp2+((wallType[5]-wallType[3])/brickLines)+wallType[3])-(pp1+((wallType[7]-wallType[1])/brickLines)+wallType[1]))/wallType[2]-wallType[0];
+							var x2 = i1;
+							var b2 = pp1+((wallType[7]-wallType[1])/brickLines);+wallType[1];
+							y2 = (m2*x2)+b2
+
+							this.ctx.moveTo(i1,y1);
+							this.ctx.lineTo(i1,y2);
+							i1 = i1+80-i2;
+							i2 = i2+5;
+							i3++;
+						};
+					};
+				}
+					
+					
+					
+				this.ctx.stroke();
+				pp1 = pp1 + (wallType[7]-wallType[1])/brickLines;
+				pp2 = pp2 + (wallType[5]-wallType[3])/brickLines;
+			}	
+		}
 	}
 }
 
