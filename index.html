@@ -3,14 +3,29 @@
 <head>
 	<title>Mystery</title>
 </head>
-<body>
+<body style="background-color:#333333;">
 	<canvas id="canvas">Your browser does not support the HTML5 canvas tag.</canvas>
 	<script src="js/engine.js"></script>
 	<script type="text/javascript">
 		axisFinder();
 		generateWorld();
 		cubePositioning(direction,topfacing, currentLocation, viewOrient);
+		ctx.setTransform(1,0,0,1,0,0)
 		DISPLAY_renderAllBoxes(.3)
+
+
+ctx.beginPath()
+ctx.strokeStyle="#000000"
+ctx.moveTo(0,0)
+ctx.lineTo(1000,1000)
+ctx.moveTo(1000,0)
+ctx.lineTo(0,1000)
+ctx.moveTo(0,350)
+ctx.lineTo(1000,650)
+ctx.moveTo(0,650)
+ctx.lineTo(1000,350)
+ctx.stroke()
+ctx.closePath()
 
 	</script>
 
