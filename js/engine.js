@@ -13,7 +13,7 @@ function preventZoom(e) {
 
 
 var worldArray;
-var currentLocation = 2;
+var currentLocation = 7;
 var moves = 0;
 var viewOrient = "BACK";
 var zAxis = ["UP","E","DOWN","W"];	
@@ -60,8 +60,8 @@ function generateWorld() {
 		worldArray.push("2");
 
 	};
-	// worldArray = worldArray.join("");
-	worldArray = "22222000000222222000000222220000022222000"
+	worldArray = worldArray.join("");
+	worldArray = "22222111100001111002221111222000111110002211112220000022222000"
 };
 
 function axisFinder() {
@@ -239,26 +239,42 @@ function drawPosition(pos) {
 
 	switch (pos) {
 		case "0":
-			// wall.draw(ctx,wall.ceiling,"#0000ff");
-			// wall.draw(ctx,wall.floor,"#00ff00");
+			wall.draw(ctx,wall.ceiling,"#0000ff");
+			wall.draw(ctx,wall.floor,"#00ff00");
 			break;
-		case "2":
+		case "1":
 			switch(direction) {
 				case "N": case "S":
-					// wall.draw(ctx,wall.ceiling,"#0000ff");
-					// wall.draw(ctx,wall.floor,"#00FF00");
+					wall.draw(ctx,wall.ceiling,"#0000ff");
+					wall.draw(ctx,wall.floor,"#00FF00");
+					wall.draw(ctx,wall.front,"#ff0000");
+					
+					break;
+				case "E": case "W":
+					wall.draw(ctx,wall.ceiling,"#0000ff");
+					wall.draw(ctx,wall.floor,"#00FF00");
 					wall.draw(ctx,wall.right,"#ff0000");
 					wall.draw(ctx,wall.left,"#ff0000");
 					
 					break;
+			};
+		break;
+		case "2":
+			switch(direction) {
+				case "N": case "S":
+					wall.draw(ctx,wall.ceiling,"#0000ff");
+					wall.draw(ctx,wall.floor,"#00FF00");
+					wall.draw(ctx,wall.right,"#ff0000");
+					wall.draw(ctx,wall.left,"#ff0000");
+					break;
 				case "E": case "W":
-					// wall.draw(ctx,wall.ceiling,"#0000ff");
-					// wall.draw(ctx,wall.floor,"#00FF00");
+					wall.draw(ctx,wall.ceiling,"#0000ff");
+					wall.draw(ctx,wall.floor,"#00FF00");
 					wall.draw(ctx,wall.front,"#ff0000");
 					break;
 			};
-			
 		break;
+
 		default: 
 			ctx.font = "1500px Courier";
 			ctx.fillText(pos, 0, 1000);
@@ -276,22 +292,23 @@ function DISPLAY_renderAllBoxes() {
 	
 	
 	DISPLAY_MiddleRight();
-	// DISPLAY_MiddleLeft();
+	DISPLAY_MiddleLeft();
 	
 	
 	DISPLAY_FrontRight();
 	DISPLAY_FrontLeft();
 	
 
-	
 	DISPLAY_Right();
 	DISPLAY_Left();
+	
 	
 	
 
 	DISPLAY_BackCenter();
 	DISPLAY_MiddleCenter();
 	DISPLAY_FrontCenter();
+	
 	DISPLAY_Current();
 	ctx.closePath();
 };
@@ -300,7 +317,11 @@ function DISPLAY_BackLeft(xMove) {
 	if (!xMove) xMove=0;
 	var allObjects = drawingWhat();
 	ctx.save();
-	ctx.translate(215+xMove,405);
+	let region = new Path2D();
+	region.rect(0,0,500,1000);
+	// ctx.stroke();
+	ctx.clip(region);
+	ctx.translate(180+xMove,405);
 	ctx.scale(.62,.19);
 	drawPosition(allObjects[0]);
 	ctx.restore();
@@ -309,9 +330,13 @@ function DISPLAY_BackRight(xMove) {
 	if (!xMove) xMove=0;
 	var allObjects = drawingWhat();
 	ctx.save();
+	let region = new Path2D();
+	region.rect(500,0,500,1000);
+	// ctx.stroke();
+	ctx.clip(region);
 
-	ctx.translate(595+xMove,405);
-	ctx.scale(.19,.19);
+	ctx.translate(200+xMove,405);
+	ctx.scale(.62,.19);
 	drawPosition(allObjects[1]);
 	ctx.restore();
 };
@@ -330,11 +355,11 @@ function DISPLAY_MiddleLeft(xMove) {
 	var allObjects = drawingWhat();
 	ctx.save();
 	let region = new Path2D();
-	region.rect(700,0,500,1000);
+	region.rect(0,0,500,1000);
 	// ctx.stroke();
 	ctx.clip(region);
 	ctx.translate(-120+xMove,310);
-	ctx.scale(1.25,.38);
+	ctx.scale(1.15,.38);
 	drawPosition(allObjects[3]);
 	ctx.restore();
 };
@@ -343,10 +368,10 @@ function DISPLAY_MiddleRight(xMove) {
 	var allObjects = drawingWhat();
 	ctx.save();
 	let region = new Path2D();
-	region.rect(700,0,500,1000);
+	region.rect(500,0,500,1000);
 	// ctx.stroke();
 	ctx.clip(region);
-	ctx.translate(-120+xMove,310);
+	ctx.translate(-110+xMove,310);
 	ctx.scale(1.25,.38);
 	drawPosition(allObjects[4]);
 	ctx.restore();
@@ -366,11 +391,11 @@ function DISPLAY_FrontLeft(xMove) {
 	var allObjects = drawingWhat();
 	ctx.save();
 	let region = new Path2D();
-	region.rect(300,0,-500,1000);
+	region.rect(0,0,500,1000);
 	// ctx.stroke();
 	ctx.clip(region);
-	ctx.translate(-625+xMove,125);
-	ctx.scale(.75,.75);
+	ctx.translate(-725+xMove,125);
+	ctx.scale(2.5,.75);
 	drawPosition(allObjects[6]);
 	ctx.restore();
 };
@@ -380,11 +405,11 @@ function DISPLAY_FrontRight(xMove) {
 
 	ctx.save();
 	let region = new Path2D();
-	region.rect(700,0,500,1000);
+	region.rect(500,0,500,1000);
 	// ctx.stroke();
 	ctx.clip(region);
-	ctx.translate(500+xMove,125);
-	ctx.scale(.75,.75,);
+	ctx.translate(-725+xMove,125);
+	ctx.scale(2.5,.75,);
 	drawPosition(allObjects[7]);
 	ctx.restore();
 };
@@ -405,11 +430,11 @@ function DISPLAY_Left(xMove) {
 	var allObjects = drawingWhat();
 	ctx.save();
 	let region = new Path2D();
-	region.rect(0,0,125,1000);
+	region.rect(0,0,500,1000);
 	// ctx.stroke();
 	ctx.clip(region);
-	ctx.translate(-1000+xMove,-250);
-	ctx.scale(1.5,1.5);
+	ctx.translate(-1800+xMove,-250);
+	ctx.scale(5,1.5);
 	drawPosition(allObjects[9]);
 	ctx.restore();
 };	
@@ -419,11 +444,11 @@ function DISPLAY_Right(xMove) {
 	var allObjects = drawingWhat();
 	ctx.save();
 	let region = new Path2D();
-	region.rect(875,0,125,1000);
+	region.rect(500,0,500,1000);
 	// ctx.stroke();
 	ctx.clip(region);
-	ctx.translate(500+xMove,-250);
-	ctx.scale(1.5,1.5);
+	ctx.translate(-1000+xMove,-250);
+	ctx.scale(5,1.5);
 	drawPosition(allObjects[10]);
 	ctx.restore();
 };
@@ -466,6 +491,8 @@ const wall = {
 		this.ctx.fill();
 		this.bricks(wallType);
 		this.ctx.closePath();
+		
+		
 	},
 	bricks   : function(wallType) {
 		var brickLines = 4;
@@ -475,6 +502,11 @@ const wall = {
 			for (let i=0;i<brickLines;i++) {
 				this.ctx.strokeStyle = "#ffffff";
 				this.ctx.lineWidth = 4;
+				this.ctx.moveTo(wallType[0],wallType[1]);
+				this.ctx.lineTo(wallType[2],wallType[3]);
+				this.ctx.lineTo(wallType[4],wallType[5]);
+				this.ctx.lineTo(wallType[6],wallType[7]);
+				this.ctx.lineTo(wallType[0],wallType[1]);
 				this.ctx.moveTo(wallType[0],pp1+wallType[1]);
 				this.ctx.lineTo(wallType[2],pp2+wallType[3]);
 				this.ctx.stroke();
@@ -515,6 +547,7 @@ function GAME_moveForward() {
 
 		ctx.restore();
 		// if (c[0]==30) LOGIC_movement();
+		
 
 		if (c[0]>59) clearInterval(animation),LOGIC_movement(),DISPLAY_renderAllBoxes(.3);
 	}, 1000/FPS);
@@ -592,4 +625,22 @@ function GAME_turnRight() {
 	}, 1000/FPS);
 	
 	
+}
+
+
+
+// ########## DEGUB ############ //
+function guideLines() {
+	ctx.beginPath()
+	ctx.strokeStyle="#000000"
+	ctx.moveTo(0,0)
+	ctx.lineTo(1000,1000)
+	ctx.moveTo(1000,0)
+	ctx.lineTo(0,1000)
+	ctx.moveTo(0,350)
+	ctx.lineTo(1000,650)
+	ctx.moveTo(0,650)
+	ctx.lineTo(1000,350)
+	ctx.stroke()
+	ctx.closePath()
 }
