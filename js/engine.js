@@ -317,10 +317,10 @@ function DISPLAY_BackLeft(xMove) {
 	if (!xMove) xMove=0;
 	var allObjects = drawingWhat();
 	ctx.save();
-	let region = new Path2D();
-	region.rect(0,0,500,1000);
-	// ctx.stroke();
-	ctx.clip(region);
+	// let region = new Path2D();
+	// region.rect(0,0,500,1000);
+	// // ctx.stroke();
+	// ctx.clip(region);
 	ctx.translate(180+xMove,405);
 	ctx.scale(.62,.19);
 	drawPosition(allObjects[0]);
@@ -330,10 +330,10 @@ function DISPLAY_BackRight(xMove) {
 	if (!xMove) xMove=0;
 	var allObjects = drawingWhat();
 	ctx.save();
-	let region = new Path2D();
-	region.rect(500,0,500,1000);
-	// ctx.stroke();
-	ctx.clip(region);
+	// let region = new Path2D();
+	// region.rect(500,0,500,1000);
+	// // ctx.stroke();
+	// ctx.clip(region);
 
 	ctx.translate(200+xMove,405);
 	ctx.scale(.62,.19);
@@ -354,10 +354,10 @@ function DISPLAY_MiddleLeft(xMove) {
 	if (!xMove) xMove=0;
 	var allObjects = drawingWhat();
 	ctx.save();
-	let region = new Path2D();
-	region.rect(0,0,500,1000);
-	// ctx.stroke();
-	ctx.clip(region);
+	// let region = new Path2D();
+	// region.rect(0,0,500,1000);
+	// // ctx.stroke();
+	// ctx.clip(region);
 	ctx.translate(-120+xMove,310);
 	ctx.scale(1.15,.38);
 	drawPosition(allObjects[3]);
@@ -390,10 +390,10 @@ function DISPLAY_FrontLeft(xMove) {
 	if (!xMove) xMove=0;
 	var allObjects = drawingWhat();
 	ctx.save();
-	let region = new Path2D();
-	region.rect(0,0,500,1000);
-	// ctx.stroke();
-	ctx.clip(region);
+	// let region = new Path2D();
+	// region.rect(0,0,500,1000);
+	// // ctx.stroke();
+	// ctx.clip(region);
 	ctx.translate(-725+xMove,125);
 	ctx.scale(2.5,.75);
 	drawPosition(allObjects[6]);
@@ -404,10 +404,10 @@ function DISPLAY_FrontRight(xMove) {
 	var allObjects = drawingWhat();
 
 	ctx.save();
-	let region = new Path2D();
-	region.rect(500,0,500,1000);
-	// ctx.stroke();
-	ctx.clip(region);
+	// let region = new Path2D();
+	// region.rect(500,0,500,1000);
+	// // ctx.stroke();
+	// ctx.clip(region);
 	ctx.translate(-725+xMove,125);
 	ctx.scale(2.5,.75,);
 	drawPosition(allObjects[7]);
@@ -557,7 +557,6 @@ function GAME_turnRight() {
 	let oldWalls;
 	let tempStable = wall;
 	let c=[0,0,0,0,0,0];
-	let fb=wall.right;
 	let animation = setInterval(function() {
 		ctx.clearRect(0,0,1000,1000);
 		c[0]+=1;
@@ -578,6 +577,16 @@ function GAME_turnRight() {
 			wall.right[5];
 			wall.right[6]+=(250/60);
 			wall.right[7]-=(250/60);
+
+			wall.front[0]-=(250/60);
+			wall.front[1]-=(250/60);
+			wall.front[2];
+			wall.front[3];
+			wall.front[4];
+			wall.front[5];
+			wall.front[6]-=(250/60);
+			wall.front[7]+=(250/60);
+
 			ctx.save()
 			
 			ctx.setTransform(1+c[1],0,0,1+c[5],-c[3],-c[2]);
@@ -590,11 +599,21 @@ function GAME_turnRight() {
 		}
 
 		else if (c[0]==29) {
+			wall.left  = wall.front;
 			wall.front = wall.right;
 
 			LOGIC_rotate("YAW", 1);
 		}
 		else {
+
+			wall.left[0]-=(250/60);
+			wall.left[1]-=(250/60);
+			wall.left[2];
+			wall.left[3];
+			wall.left[4];
+			wall.left[5];
+			wall.left[6]-=(250/60);
+			wall.left[7]+=(250/60);
 
 			wall.front[0]+=(250/60);
 			wall.front[1]+=(250/60);
@@ -616,15 +635,10 @@ function GAME_turnRight() {
 
 		}
 
-		
-		
-		
-
 
 		if (c[0]>59) clearInterval(animation),setVars(),ctx.setTransform(1,0,0,1,0,0),DISPLAY_renderAllBoxes(); //
 	}, 1000/FPS);
-	
-	
+
 }
 
 
