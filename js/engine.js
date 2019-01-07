@@ -61,7 +61,7 @@ function generateWorld() {
 
 	};
 	worldArray = worldArray.join("");
-	worldArray = "22222111100001111002221111222000111110002211112220000022222000"
+	// worldArray = "22222111100001111002221111222000111110002211112220000022222000"
 };
 
 function axisFinder() {
@@ -234,27 +234,27 @@ var ctx = canvas.getContext("2d");
 
 
 // Draws the individual box art, doesn't place, just draws.
-function drawPosition(pos) {
+function drawPosition(pos,posAdj) {
 	
 
 	switch (pos) {
 		case "0":
-			wall.draw(ctx,wall.ceiling,"#0000ff");
-			wall.draw(ctx,wall.floor,"#00ff00");
+			// wall.draw(ctx,wall.ceiling,"#0000ff",posAdj);
+			// wall.draw(ctx,wall.floor,"#00ff00",posAdj);
 			break;
 		case "1":
 			switch(direction) {
 				case "N": case "S":
-					wall.draw(ctx,wall.ceiling,"#0000ff");
-					wall.draw(ctx,wall.floor,"#00FF00");
-					wall.draw(ctx,wall.front,"#ff0000");
+					// wall.draw(ctx,wall.ceiling,"#0000ff",posAdj);
+					// wall.draw(ctx,wall.floor,"#00FF00",posAdj);
+					wall.draw(ctx,wall.front,"#ff0000",posAdj);
 					
 					break;
 				case "E": case "W":
-					wall.draw(ctx,wall.ceiling,"#0000ff");
-					wall.draw(ctx,wall.floor,"#00FF00");
-					wall.draw(ctx,wall.right,"#ff0000");
-					wall.draw(ctx,wall.left,"#ff0000");
+					// wall.draw(ctx,wall.ceiling,"#0000ff",posAdj);
+					// wall.draw(ctx,wall.floor,"#00FF00",posAdj);
+					wall.draw(ctx,wall.right,"#ff0000",posAdj);
+					wall.draw(ctx,wall.left,"#ff0000",posAdj);
 					
 					break;
 			};
@@ -262,15 +262,15 @@ function drawPosition(pos) {
 		case "2":
 			switch(direction) {
 				case "N": case "S":
-					wall.draw(ctx,wall.ceiling,"#0000ff");
-					wall.draw(ctx,wall.floor,"#00FF00");
-					wall.draw(ctx,wall.right,"#ff0000");
-					wall.draw(ctx,wall.left,"#ff0000");
+					// wall.draw(ctx,wall.ceiling,"#0000ff",posAdj);
+					// wall.draw(ctx,wall.floor,"#00FF00",posAdj);
+					wall.draw(ctx,wall.right,"#ff0000",posAdj);
+					wall.draw(ctx,wall.left,"#ff0000",posAdj);
 					break;
 				case "E": case "W":
-					wall.draw(ctx,wall.ceiling,"#0000ff");
-					wall.draw(ctx,wall.floor,"#00FF00");
-					wall.draw(ctx,wall.front,"#ff0000");
+					// wall.draw(ctx,wall.ceiling,"#0000ff",posAdj);
+					// wall.draw(ctx,wall.floor,"#00FF00",posAdj);
+					wall.draw(ctx,wall.front,"#ff0000",posAdj);
 					break;
 			};
 		break;
@@ -287,47 +287,52 @@ function drawPosition(pos) {
 function DISPLAY_renderAllBoxes() {
 	ctx.clearRect(0,0,1000,1000);
 	ctx.beginPath();
-	DISPLAY_BackRight();
-	DISPLAY_BackLeft();
+
+	DISPLAY_BackLeft(0,[0,0,500,0,500,0,0,0,0]);
+	DISPLAY_BackRight(0,[0,0,-500,0,-500,0,0,0,0]);
 	
 	
-	DISPLAY_MiddleRight();
-	DISPLAY_MiddleLeft();
+	DISPLAY_MiddleLeft(0,[0,0,500,0,500,0,0,0,0]);
+	DISPLAY_MiddleRight(0,[0,0,-500,0,-500,0,0,0,0]);
 	
 	
-	DISPLAY_FrontRight();
-	DISPLAY_FrontLeft();
+	DISPLAY_FrontLeft(0,[0,0,500,0,500,0,0,0,0]);
+	DISPLAY_FrontRight(0,[0,0,-500,0,-500,0,0,0,0]);
+	
+	
+	DISPLAY_Left(0,[0,0,500,0,500,0,0,0,0]);
+	DISPLAY_Right(0,[0,0,-500,0,-500,0,0,0,0]);
+	
+	
+	
 	
 
-	DISPLAY_Right();
-	DISPLAY_Left();
+	DISPLAY_BackCenter(0,[0,0,0,0,0,0,0,0]);
+	DISPLAY_MiddleCenter(0,[0,0,0,0,0,0,0,0]);
+	DISPLAY_FrontCenter(0,[0,0,0,0,0,0,0,0]);
 	
-	
-	
+	DISPLAY_Current(0,[0,0,0,0,0,0,0,0]);
 
-	DISPLAY_BackCenter();
-	DISPLAY_MiddleCenter();
-	DISPLAY_FrontCenter();
-	
-	DISPLAY_Current();
 	ctx.closePath();
 };
 // ctx.fillStyle="rgba(0,0,0,0)"
-function DISPLAY_BackLeft(xMove) {
+function DISPLAY_BackLeft(xMove,posAdj) {
 	if (!xMove) xMove=0;
+	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
 	// let region = new Path2D();
 	// region.rect(0,0,500,1000);
 	// // ctx.stroke();
 	// ctx.clip(region);
-	ctx.translate(180+xMove,405);
-	ctx.scale(.62,.19);
-	drawPosition(allObjects[0]);
+	ctx.translate(215+xMove,405);
+	ctx.scale(.19,.19);
+	drawPosition(allObjects[0],posAdj);
 	ctx.restore();
 };
-function DISPLAY_BackRight(xMove) {
+function DISPLAY_BackRight(xMove,posAdj) {
 	if (!xMove) xMove=0;
+	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
 	// let region = new Path2D();
@@ -335,72 +340,78 @@ function DISPLAY_BackRight(xMove) {
 	// // ctx.stroke();
 	// ctx.clip(region);
 
-	ctx.translate(200+xMove,405);
-	ctx.scale(.62,.19);
-	drawPosition(allObjects[1]);
+	ctx.translate(595+xMove,405);
+	ctx.scale(.19,.19);
+	drawPosition(allObjects[1],posAdj);
 	ctx.restore();
 };
-function DISPLAY_BackCenter(xMove) {
+function DISPLAY_BackCenter(xMove,posAdj) {
 	if (!xMove) xMove=0;
+	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
 	ctx.translate(405+xMove,405);
 	ctx.scale(.19,.19);
-	drawPosition(allObjects[2]);
+	drawPosition(allObjects[2],posAdj);
 	ctx.restore();
 };
 
-function DISPLAY_MiddleLeft(xMove) {
+function DISPLAY_MiddleLeft(xMove,posAdj) {
 	if (!xMove) xMove=0;
+	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
 	// let region = new Path2D();
 	// region.rect(0,0,500,1000);
 	// // ctx.stroke();
 	// ctx.clip(region);
-	ctx.translate(-120+xMove,310);
-	ctx.scale(1.15,.38);
-	drawPosition(allObjects[3]);
+	ctx.translate(-70+xMove,310);
+	ctx.scale(.38,.38);
+	drawPosition(allObjects[3],posAdj);
 	ctx.restore();
 };
-function DISPLAY_MiddleRight(xMove) {
+function DISPLAY_MiddleRight(xMove,posAdj) {
 	if (!xMove) xMove=0;
+	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
-	let region = new Path2D();
-	region.rect(500,0,500,1000);
-	// ctx.stroke();
-	ctx.clip(region);
-	ctx.translate(-110+xMove,310);
-	ctx.scale(1.25,.38);
-	drawPosition(allObjects[4]);
+	// let region = new Path2D();
+	// region.rect(500,0,500,1000);
+	// // ctx.stroke();
+	// ctx.clip(region);
+	ctx.translate(690+xMove,310);
+	ctx.scale(.38,.38);
+	drawPosition(allObjects[4],posAdj);
 	ctx.restore();
 };
-function DISPLAY_MiddleCenter(xMove) {
+function DISPLAY_MiddleCenter(xMove,posAdj) {
 	if (!xMove) xMove=0;
+	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
 	ctx.translate(310+xMove,310);
 	ctx.scale(.38,.38);
-	drawPosition(allObjects[5]);
+	drawPosition(allObjects[5],posAdj);
 	ctx.restore();
 };
 
-function DISPLAY_FrontLeft(xMove) {
+function DISPLAY_FrontLeft(xMove,posAdj) {
 	if (!xMove) xMove=0;
+	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
 	// let region = new Path2D();
 	// region.rect(0,0,500,1000);
 	// // ctx.stroke();
 	// ctx.clip(region);
-	ctx.translate(-725+xMove,125);
-	ctx.scale(2.5,.75);
-	drawPosition(allObjects[6]);
+	ctx.translate(-625+xMove,125);
+	ctx.scale(.75,.75);
+	drawPosition(allObjects[6],posAdj);
 	ctx.restore();
 };
-function DISPLAY_FrontRight(xMove) {
+function DISPLAY_FrontRight(xMove,posAdj) {
 	if (!xMove) xMove=0;
+	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 
 	ctx.save();
@@ -408,59 +419,63 @@ function DISPLAY_FrontRight(xMove) {
 	// region.rect(500,0,500,1000);
 	// // ctx.stroke();
 	// ctx.clip(region);
-	ctx.translate(-725+xMove,125);
-	ctx.scale(2.5,.75,);
-	drawPosition(allObjects[7]);
+	ctx.translate(875+xMove,125);
+	ctx.scale(.75,.75,);
+	drawPosition(allObjects[7],posAdj);
 	ctx.restore();
 };
 
-function DISPLAY_FrontCenter(xMove) {
+function DISPLAY_FrontCenter(xMove,posAdj) {
 	if (!xMove) xMove=0;
+	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 
 	ctx.save();
 	ctx.translate(125+xMove,125);
 	ctx.scale(.75,.75);
-	drawPosition(allObjects[8]);
+	drawPosition(allObjects[8],posAdj);
 	ctx.restore();
 };
 
-function DISPLAY_Left(xMove) {
+function DISPLAY_Left(xMove,posAdj) {
 	if (!xMove) xMove=0;
+	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
-	let region = new Path2D();
-	region.rect(0,0,500,1000);
-	// ctx.stroke();
-	ctx.clip(region);
-	ctx.translate(-1800+xMove,-250);
-	ctx.scale(5,1.5);
-	drawPosition(allObjects[9]);
+	// let region = new Path2D();
+	// region.rect(0,0,500,1000);
+	// // ctx.stroke();
+	// ctx.clip(region);
+	ctx.translate(-1750+xMove,-250);
+	ctx.scale(1.5,1.5);
+	drawPosition(allObjects[9],posAdj);
 	ctx.restore();
 };	
 
-function DISPLAY_Right(xMove) {
+function DISPLAY_Right(xMove,posAdj) {
 	if (!xMove) xMove=0;
+	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
-	let region = new Path2D();
-	region.rect(500,0,500,1000);
-	// ctx.stroke();
-	ctx.clip(region);
-	ctx.translate(-1000+xMove,-250);
-	ctx.scale(5,1.5);
-	drawPosition(allObjects[10]);
+	// let region = new Path2D();
+	// region.rect(500,0,500,1000);
+	// // ctx.stroke();
+	// ctx.clip(region);
+	ctx.translate(1250+xMove,-250);
+	ctx.scale(1.5,1.5);
+	drawPosition(allObjects[10],posAdj);
 	ctx.restore();
 };
 
 
-function DISPLAY_Current(xMove) {
+function DISPLAY_Current(xMove,posAdj) {
 	if (!xMove) xMove=0;
+	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
 	ctx.translate(-250+xMove,-250);
 	ctx.scale(1.5,1.5);
-	drawPosition(allObjects[11]);
+	drawPosition(allObjects[11],posAdj);
 	ctx.restore();
 };
 
@@ -479,22 +494,23 @@ const wall = {
 	front   : [250,250,750,250,750,750,250,750],
 	behind  : [0,0,0,0,0,0,0,0],
 
-	draw    : function(ctx,wallType,fill) {
+	draw    : function(ctx,wallType,fill,posAdj) {
+		if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 		this.ctx = ctx;
 		this.ctx.beginPath();
 		this.ctx.fillStyle=fill;
-		this.ctx.moveTo(wallType[0],wallType[1]);
-		this.ctx.lineTo(wallType[2],wallType[3]);
-		this.ctx.lineTo(wallType[4],wallType[5]);
-		this.ctx.lineTo(wallType[6],wallType[7]);
-		this.ctx.lineTo(wallType[0],wallType[1]);
+		this.ctx.moveTo(wallType[0]+posAdj[0],wallType[1]+posAdj[1]);
+		this.ctx.lineTo(wallType[2]+posAdj[2],wallType[3]+posAdj[3]);
+		this.ctx.lineTo(wallType[4]+posAdj[4],wallType[5]+posAdj[5]);
+		this.ctx.lineTo(wallType[6]+posAdj[6],wallType[7]+posAdj[7]);
+		this.ctx.lineTo(wallType[0]+posAdj[0],wallType[1]+posAdj[1]);
 		this.ctx.fill();
-		this.bricks(wallType);
+		this.bricks(wallType,posAdj);
 		this.ctx.closePath();
 		
 		
 	},
-	bricks   : function(wallType) {
+	bricks   : function(wallType,posAdj) {
 		var brickLines = 4;
 		var pp1 = 0;
 		var pp2 = 0;
@@ -502,16 +518,16 @@ const wall = {
 			for (let i=0;i<brickLines;i++) {
 				this.ctx.strokeStyle = "#ffffff";
 				this.ctx.lineWidth = 4;
-				this.ctx.moveTo(wallType[0],wallType[1]);
-				this.ctx.lineTo(wallType[2],wallType[3]);
-				this.ctx.lineTo(wallType[4],wallType[5]);
-				this.ctx.lineTo(wallType[6],wallType[7]);
-				this.ctx.lineTo(wallType[0],wallType[1]);
-				this.ctx.moveTo(wallType[0],pp1+wallType[1]);
-				this.ctx.lineTo(wallType[2],pp2+wallType[3]);
+				this.ctx.moveTo(wallType[0]+posAdj[0],wallType[1]+posAdj[1]);
+				this.ctx.lineTo(wallType[2]+posAdj[2],wallType[3]+posAdj[3]);
+				this.ctx.lineTo(wallType[4]+posAdj[4],wallType[5]+posAdj[5]);
+				this.ctx.lineTo(wallType[6]+posAdj[6],wallType[7]+posAdj[7]);
+				this.ctx.lineTo(wallType[0]+posAdj[0],wallType[1]+posAdj[1]);
+				this.ctx.moveTo(wallType[0]+posAdj[0],pp1+wallType[1]+posAdj[1]);
+				this.ctx.lineTo(wallType[2]+posAdj[2],pp2+wallType[3]+posAdj[3]);
 				this.ctx.stroke();
-				pp1 = pp1 + (wallType[7]-wallType[1])/brickLines;
-				pp2 = pp2 + (wallType[5]-wallType[3])/brickLines;
+				pp1 = pp1 + ((wallType[7]+posAdj[7])-(wallType[1]+posAdj[1]))/brickLines;
+				pp2 = pp2 + ((wallType[5]+posAdj[5])-(wallType[3]+posAdj[3]))/brickLines;
 			};	
 		};
 	}
@@ -528,7 +544,7 @@ function setVars() {
 	wall.ceiling  = [0,0,0,250,1000,250,1000,0]
 	wall.floor    = [0,1000,0,750,1000,750,1000,1000]
 	wall.front    = [250,250,750,250,750,750,250,750]
-	wall.behind   = [0,0,0,0,0,0,0,0]
+	wall.behind   = [250,250,750,250,750,750,250,750]
 };
 
 function GAME_moveForward() {
@@ -556,84 +572,53 @@ function GAME_moveForward() {
 function GAME_turnRight() {
 	let oldWalls;
 	let tempStable = wall;
-	let c=[0,0,0,0,0,0];
+	let c=[0,0,0,0,0,0,0,0];
 	let animation = setInterval(function() {
 		ctx.clearRect(0,0,1000,1000);
 		c[0]+=1;
-		c[1]+=(1/35);
-		c[2]+=(500/60);
-		c[3]+=(2200/60);
-		c[4]+=(750/60);
-		c[5]+=(1/60)
+		c[1]+=(500/60);
+		c[2]+=(250/60);
+		c[3]+=(675/60)
+		c[4]+=(50/60);
+		c[5]+=(575/60);
+		c[6]+=(950/60)
 
 		
 		
 		if (c[0]<29) {
-			wall.right[0]+=(250/60);
-			wall.right[1]+=(250/60);
-			wall.right[2];
-			wall.right[3];
-			wall.right[4];
-			wall.right[5];
-			wall.right[6]+=(250/60);
-			wall.right[7]-=(250/60);
 
-			wall.front[0]-=(250/60);
-			wall.front[1]-=(250/60);
-			wall.front[2];
-			wall.front[3];
-			wall.front[4];
-			wall.front[5];
-			wall.front[6]-=(250/60);
-			wall.front[7]+=(250/60);
 
-			ctx.save()
-			
-			ctx.setTransform(1+c[1],0,0,1+c[5],-c[3],-c[2]);
-			DISPLAY_FrontCenter();
-			ctx.restore();
-			ctx.save();
-			ctx.setTransform(1,0,0,1,-c[4],0);
-			DISPLAY_Current();
-			ctx.restore();
-		}
+			DISPLAY_MiddleCenter(-c[6],[-c[2],-c[1],-c[3],-c[3],-c[3],c[3],-c[2],c[1]]);
+			DISPLAY_FrontCenter(-c[5],[-c[2],0,-c[3],-c[2],-c[3],c[2],-c[2],0]);
+			DISPLAY_Current(0,[-c[2],c[2],-c[1],0,-c[1],0,-c[2],-c[2]]);
 
-		else if (c[0]==29) {
-			wall.left  = wall.front;
-			wall.front = wall.right;
 
-			LOGIC_rotate("YAW", 1);
 		}
 		else {
+			if (c[0]==29) {
+				wall.left  = wall.front;
+				wall.front = wall.right;
 
-			wall.left[0]-=(250/60);
-			wall.left[1]-=(250/60);
-			wall.left[2];
-			wall.left[3];
-			wall.left[4];
-			wall.left[5];
-			wall.left[6]-=(250/60);
-			wall.left[7]+=(250/60);
+				LOGIC_rotate("YAW", 1);	
+			}
 
-			wall.front[0]+=(250/60);
-			wall.front[1]+=(250/60);
-			wall.front[2]
-			wall.front[3]
-			wall.front[4]
-			wall.front[5]
-			wall.front[6]+=(250/60);
-			wall.front[7]-=(250/60);
-			ctx.save()
 			
-			ctx.setTransform(1+c[1],0,0,1+c[5],-c[3],-c[2]);
-			DISPLAY_FrontCenter();
-			ctx.restore();
-			ctx.save();
-			ctx.setTransform(1,0,0,1,-c[4],0);
-			DISPLAY_Current();
-			ctx.restore();
+			DISPLAY_MiddleCenter(-c[6],[-c[2],-c[1],-c[3],-c[3],-c[3],c[3],-c[2],c[1]]);
+			DISPLAY_FrontCenter(-c[5],[-c[2],0,-c[3],-c[2],-c[3],c[2],-c[2],0]);
+			DISPLAY_Current(0,[-c[2],c[2],-c[1],0,-c[1],0,-c[2],-c[2]]);
+			
+
+			// ctx.save()
+			// ctx.setTransform(1+c[1],0,0,1+c[5],-c[3],-c[2]);
+			// DISPLAY_FrontCenter();
+			// ctx.restore();
+			// ctx.save();
+			// ctx.setTransform(1,0,0,1,-c[4],0);
+			// DISPLAY_Current();
+			// ctx.restore();
 
 		}
+
 
 
 		if (c[0]>59) clearInterval(animation),setVars(),ctx.setTransform(1,0,0,1,0,0),DISPLAY_renderAllBoxes(); //
