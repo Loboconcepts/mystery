@@ -5,25 +5,40 @@
 </head>
 <body style="background-color:#333333;">
 	<canvas id="canvas">Your browser does not support the HTML5 canvas tag.</canvas>
+	<br>
+	<input oninput="slider(this.value)" id="slider" type="range" min="-800" max="800" value="0">
 	<script src="js/engine.js"></script>
 	<script type="text/javascript">
 		axisFinder();
 		generateWorld();
 		cubePositioning(direction,topfacing, currentLocation, viewOrient);
-		ctx.setTransform(1,0,0,1,0,0)
+		
 		DISPLAY_renderAllBoxes(.3)
+		
+		function slider(val) {
+			ctx.clearRect(-500,-500,1000,1000)
+			
+
+			ctx.save();
+			ctx.translate(val,0);
+			
+			DISPLAY_renderAllBoxes(.3);
+			ctx.restore();
+
+		}
+
 
 
 ctx.beginPath()
 ctx.strokeStyle="#000000"
-ctx.moveTo(0,0)
-ctx.lineTo(1000,1000)
-ctx.moveTo(1000,0)
-ctx.lineTo(0,1000)
-ctx.moveTo(0,330)
-ctx.lineTo(1000,670)
-ctx.moveTo(0,670)
-ctx.lineTo(1000,330)
+ctx.moveTo(-500,-500)
+ctx.lineTo(500,500)
+ctx.moveTo(500,-500)
+ctx.lineTo(-500,500)
+ctx.moveTo(-500,-170)
+ctx.lineTo(500,170)
+ctx.moveTo(-500,170)
+ctx.lineTo(500,-170)
 ctx.stroke()
 ctx.closePath()
 
