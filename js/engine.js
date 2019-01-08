@@ -19,7 +19,7 @@ var viewOrient = "BACK";
 var zAxis = ["UP","E","DOWN","W"];	
 var yAxis = ["N","E","S","W"];
 var xAxis = ["UP","S","DOWN","N"];
-var direction = "E";
+var direction = "N";
 var topfacing = "UP";
 var yawAxis;
 var rollAxis;
@@ -305,28 +305,28 @@ function DISPLAY_renderAllBoxes() {
 	// ctx.clearRect(-500,-500,1000,1000);
 	ctx.beginPath();
 
-	// DISPLAY_BackLeft(0,[0,0,500,0,500,0,0,0,0]);
-	// DISPLAY_BackRight(0,[0,0,-500,0,-500,0,0,0,0]);
+	DISPLAY_BackLeft(0,[0,0,500,0,500,0,0,0,0]);
+	DISPLAY_BackRight(0,[0,0,-500,0,-500,0,0,0,0]);
 	
 	
-	// DISPLAY_MiddleLeft(0,[0,0,500,0,500,0,0,0,0]);
-	// DISPLAY_MiddleRight(0,[0,0,-500,0,-500,0,0,0,0]);
+	DISPLAY_MiddleLeft(0,[0,0,500,0,500,0,0,0,0]);
+	DISPLAY_MiddleRight(0,[0,0,-500,0,-500,0,0,0,0]);
 	
 	
-	// DISPLAY_FrontLeft(0,[0,0,500,0,500,0,0,0,0]);
-	// DISPLAY_FrontRight(0,[0,0,-500,0,-500,0,0,0,0]);
+	DISPLAY_FrontLeft(0,[0,0,500,0,500,0,0,0,0]);
+	DISPLAY_FrontRight(0,[0,0,-500,0,-500,0,0,0,0]);
 	
 	
-	// DISPLAY_Left(0,[0,0,500,0,500,0,0,0,0]);
-	// DISPLAY_Right(0,[0,0,-500,0,-500,0,0,0,0]);
+	DISPLAY_Left(0,[0,0,500,0,500,0,0,0,0]);
+	DISPLAY_Right(0,[0,0,-500,0,-500,0,0,0,0]);
 	
 	
 	
 	
 
-	// DISPLAY_BackCenter(0,[0,0,0,0,0,0,0,0]);
-	// DISPLAY_MiddleCenter(0,[0,0,0,0,0,0,0,0]);
-	// DISPLAY_FrontCenter(0,[0,0,0,0,0,0,0,0]);
+	DISPLAY_BackCenter(0,[0,0,0,0,0,0,0,0]);
+	DISPLAY_MiddleCenter(0,[0,0,0,0,0,0,0,0]);
+	DISPLAY_FrontCenter(0,[0,0,0,0,0,0,0,0]);
 	
 	DISPLAY_Current(0,[0,0,0,0,0,0,0,0]);
 
@@ -478,34 +478,44 @@ const wall = {
 
 	draw    : function(ctx,wallType,fill,posAdj) {
 		if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
-		if (wallType == wall.front) posAdj[1]=posAdj[1]*-1, posAdj[7]=posAdj[7]*-1,posAdj[2]=Math.abs(posAdj[2]);
+		// if (wallType == wall.front) posAdj[1]=posAdj[1]*-1, posAdj[7]=posAdj[7]*-1,posAdj[2]=Math.abs(posAdj[2]);
+		let topSlope = this.slope(wallType[0]+posAdj[0],wallType[1]+posAdj[1],wallType[2]+posAdj[2],wallType[3]+posAdj[3]);
+		let botSlope = this.slope(wallType[4]+posAdj[4],wallType[5]+posAdj[5],wallType[6]+posAdj[6],wallType[7]+posAdj[7]);
 		this.ctx = ctx;
 		this.ctx.beginPath();
 		this.ctx.fillStyle=fill;
-		//CORNER
-		this.ctx.moveTo(vanishingPoint[0],wallType[1]+posAdj[1]);
-		this.ctx.lineTo(wallType[0]+posAdj[0],wallType[1]+posAdj[1]);
-		this.ctx.lineTo(wallType[0]+posAdj[0],vanishingPoint[1]);
-		this.ctx.lineTo(vanishingPoint[0],vanishingPoint[1]);
-		this.ctx.lineTo(vanishingPoint[0],wallType[1]+posAdj[1]);
+		
 
-		this.ctx.moveTo(vanishingPoint[0],wallType[3]+posAdj[3]);
-		this.ctx.lineTo(wallType[2]+posAdj[2],wallType[3]+posAdj[3]);
-		this.ctx.lineTo(wallType[2]+posAdj[2],vanishingPoint[1]);
-		this.ctx.lineTo(vanishingPoint[0],vanishingPoint[1]);
-		this.ctx.lineTo(vanishingPoint[0],wallType[3]+posAdj[3]);
+		this.ctx.moveTo(topSlope[0],topSlope[1]);
+		this.ctx.lineTo(topSlope[2],topSlope[3]);
+		this.ctx.lineTo(botSlope[0],botSlope[1]);
+		this.ctx.lineTo(botSlope[2],botSlope[3]);
+		this.ctx.lineTo(topSlope[0],topSlope[1]);
 
-		this.ctx.moveTo(vanishingPoint[0],wallType[5]+posAdj[5]);
-		this.ctx.lineTo(wallType[4]+posAdj[4],wallType[5]+posAdj[5]);
-		this.ctx.lineTo(wallType[4]+posAdj[4],vanishingPoint[1]);
-		this.ctx.lineTo(vanishingPoint[0],vanishingPoint[1]);
-		this.ctx.lineTo(vanishingPoint[0],wallType[5]+posAdj[5]);
 
-		this.ctx.moveTo(vanishingPoint[0],wallType[7]+posAdj[7]);
-		this.ctx.lineTo(wallType[6]+posAdj[6],wallType[7]+posAdj[7]);
-		this.ctx.lineTo(wallType[6]+posAdj[6],vanishingPoint[1]);
-		this.ctx.lineTo(vanishingPoint[0],vanishingPoint[1]);
-		this.ctx.lineTo(vanishingPoint[0],wallType[7]+posAdj[7]);
+		// this.ctx.moveTo(vanishingPoint[0],wallType[1]+posAdj[1]);
+		// this.ctx.lineTo(wallType[0]+posAdj[0],wallType[1]+posAdj[1]);
+		// this.ctx.lineTo(wallType[0]+posAdj[0],vanishingPoint[1]);
+		// this.ctx.lineTo(vanishingPoint[0],vanishingPoint[1]);
+		// this.ctx.lineTo(vanishingPoint[0],wallType[1]+posAdj[1]);
+
+		// this.ctx.moveTo(vanishingPoint[0],wallType[3]+posAdj[3]);
+		// this.ctx.lineTo(wallType[2]+posAdj[2],wallType[3]+posAdj[3]);
+		// this.ctx.lineTo(wallType[2]+posAdj[2],vanishingPoint[1]);
+		// this.ctx.lineTo(vanishingPoint[0],vanishingPoint[1]);
+		// this.ctx.lineTo(vanishingPoint[0],wallType[3]+posAdj[3]);
+
+		// this.ctx.moveTo(vanishingPoint[0],wallType[5]+posAdj[5]);
+		// this.ctx.lineTo(wallType[4]+posAdj[4],wallType[5]+posAdj[5]);
+		// this.ctx.lineTo(wallType[4]+posAdj[4],vanishingPoint[1]);
+		// this.ctx.lineTo(vanishingPoint[0],vanishingPoint[1]);
+		// this.ctx.lineTo(vanishingPoint[0],wallType[5]+posAdj[5]);
+
+		// this.ctx.moveTo(vanishingPoint[0],wallType[7]+posAdj[7]);
+		// this.ctx.lineTo(wallType[6]+posAdj[6],wallType[7]+posAdj[7]);
+		// this.ctx.lineTo(wallType[6]+posAdj[6],vanishingPoint[1]);
+		// this.ctx.lineTo(vanishingPoint[0],vanishingPoint[1]);
+		// this.ctx.lineTo(vanishingPoint[0],wallType[7]+posAdj[7]);
 		
 		
 		this.ctx.stroke();
@@ -532,6 +542,22 @@ const wall = {
 				pp2 = pp2 + ((wallType[5]+posAdj[5])-(wallType[3]+posAdj[3]))/brickLines;
 			};	
 		};
+	},
+	slope    : function(x1, y1, x2, y2) {
+		
+		if (Math.abs(x1)>Math.abs(x2)) {
+			let slope = (y1-y2)/(x1-x2);
+			y2 = slope*x2+(y1+(-(slope)*x1));
+			return [x1,y1,x2,y2];
+		}
+		else if(Math.abs(x2)>Math.abs(x1)) {
+			let slope = (y2-y1)/(x2-x1);
+			y1 = slope*x1+(y2+(-(slope)*x2))
+			return [x1,y1,x2,y2];
+		}
+		else {
+			return [x1,y1,x2,y2];
+		}
 	}
 };
 
@@ -632,9 +658,9 @@ function GAME_turnRight() {
 		}
 		else {
 			if (c[0]==29) {
-				// wall.left  = wall.front;
-				// wall.front = wall.right;
-				
+				wall.left  = wall.front;
+				wall.front = wall.right;
+				LOGIC_rotate("YAW", 1);
 			}
 
 			
@@ -688,7 +714,7 @@ function GAME_turnRight() {
 
 
 
-		if (c[0]>59) clearInterval(animation),setVars(),LOGIC_rotate("YAW", 1),backgroundArt(1),DISPLAY_renderAllBoxes();  //
+		if (c[0]>59) clearInterval(animation),setVars(),backgroundArt(1),DISPLAY_renderAllBoxes();  //
 	}, 1000/FPS);
 
 }
