@@ -19,7 +19,7 @@ var viewOrient = "BACK";
 var zAxis = ["UP","E","DOWN","W"];	
 var yAxis = ["N","E","S","W"];
 var xAxis = ["UP","S","DOWN","N"];
-var direction = "N";
+var direction = "E";
 var topfacing = "UP";
 var yawAxis;
 var rollAxis;
@@ -231,6 +231,7 @@ var ctx = canvas.getContext("2d");
 ctx.translate(500,500);
 
 
+
 // dataUrl = canvas.toDataURL();
 
 
@@ -286,33 +287,46 @@ function drawPosition(pos,posAdj) {
 	
 };
 
+function backgroundArt(tran) {
+	ctx.beginPath();
+	ctx.fillStyle="rgba(100,200,250,"+tran+")";
+	ctx.fillRect(-500,-500,1000,550);
+	ctx.closePath();
+	ctx.beginPath();
+	ctx.fillStyle="rgba(100,250,150,"+tran+")";
+	ctx.fillRect(-500,50,1000,500);
+	ctx.closePath();
+}
+
+backgroundArt()
+
 // Renders the box contents at the appropriate size and placement. See drawPosition for individual box art.
 function DISPLAY_renderAllBoxes() {	
-	ctx.clearRect(-500,-500,1000,1000);
+	// ctx.clearRect(-500,-500,1000,1000);
 	ctx.beginPath();
 
-	DISPLAY_BackLeft(0,[0,0,500,0,500,0,0,0,0]);
-	DISPLAY_BackRight(0,[0,0,-500,0,-500,0,0,0,0]);
+	// DISPLAY_BackLeft(0,[0,0,500,0,500,0,0,0,0]);
+	// DISPLAY_BackRight(0,[0,0,-500,0,-500,0,0,0,0]);
 	
 	
-	DISPLAY_MiddleLeft(0,[0,0,500,0,500,0,0,0,0]);
-	DISPLAY_MiddleRight(0,[0,0,-500,0,-500,0,0,0,0]);
+	// DISPLAY_MiddleLeft(0,[0,0,500,0,500,0,0,0,0]);
+	// DISPLAY_MiddleRight(0,[0,0,-500,0,-500,0,0,0,0]);
 	
 	
-	DISPLAY_FrontLeft(0,[0,0,500,0,500,0,0,0,0]);
-	DISPLAY_FrontRight(0,[0,0,-500,0,-500,0,0,0,0]);
+	// DISPLAY_FrontLeft(0,[0,0,500,0,500,0,0,0,0]);
+	// DISPLAY_FrontRight(0,[0,0,-500,0,-500,0,0,0,0]);
 	
 	
-	DISPLAY_Left(0,[0,0,500,0,500,0,0,0,0]);
-	DISPLAY_Right(0,[0,0,-500,0,-500,0,0,0,0]);
+	// DISPLAY_Left(0,[0,0,500,0,500,0,0,0,0]);
+	// DISPLAY_Right(0,[0,0,-500,0,-500,0,0,0,0]);
 	
 	
 	
 	
 
-	DISPLAY_BackCenter(0,[0,0,0,0,0,0,0,0]);
-	DISPLAY_MiddleCenter(0,[0,0,0,0,0,0,0,0]);
-	DISPLAY_FrontCenter(0,[0,0,0,0,0,0,0,0]);
+	// DISPLAY_BackCenter(0,[0,0,0,0,0,0,0,0]);
+	// DISPLAY_MiddleCenter(0,[0,0,0,0,0,0,0,0]);
+	// DISPLAY_FrontCenter(0,[0,0,0,0,0,0,0,0]);
 	
 	DISPLAY_Current(0,[0,0,0,0,0,0,0,0]);
 
@@ -324,10 +338,6 @@ function DISPLAY_BackLeft(xMove,posAdj) {
 	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
-	// let region = new Path2D();
-	// region.rect(0,0,500,1000);
-	// // ctx.stroke();
-	// ctx.clip(region);
 	ctx.translate(-190+xMove,0);
 	ctx.scale(.19,.19);
 	drawPosition(allObjects[0],posAdj);
@@ -338,11 +348,6 @@ function DISPLAY_BackRight(xMove,posAdj) {
 	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
-	// let region = new Path2D();
-	// region.rect(500,0,500,1000);
-	// // ctx.stroke();
-	// ctx.clip(region);
-
 	ctx.translate(190+xMove,0);
 	ctx.scale(.19,.19);
 	drawPosition(allObjects[1],posAdj);
@@ -353,6 +358,7 @@ function DISPLAY_BackCenter(xMove,posAdj) {
 	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
+	ctx.translate(0+xMove,0);
 	ctx.scale(.19,.19);
 	drawPosition(allObjects[2],posAdj);
 	ctx.restore();
@@ -383,7 +389,7 @@ function DISPLAY_MiddleCenter(xMove,posAdj) {
 	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
-	// ctx.translate(310+xMove,310);
+	ctx.translate(0+xMove,0);
 	ctx.scale(.38,.38);
 	drawPosition(allObjects[5],posAdj);
 	ctx.restore();
@@ -394,10 +400,6 @@ function DISPLAY_FrontLeft(xMove,posAdj) {
 	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
-	// let region = new Path2D();
-	// region.rect(0,0,500,1000);
-	// // ctx.stroke();
-	// ctx.clip(region);
 	ctx.translate(-750+xMove,0);
 	ctx.scale(.75,.75);
 	drawPosition(allObjects[6],posAdj);
@@ -407,12 +409,7 @@ function DISPLAY_FrontRight(xMove,posAdj) {
 	if (!xMove) xMove=0;
 	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
-
 	ctx.save();
-	// let region = new Path2D();
-	// region.rect(500,0,500,1000);
-	// // ctx.stroke();
-	// ctx.clip(region);
 	ctx.translate(750+xMove,0);
 	ctx.scale(.75,.75,);
 	drawPosition(allObjects[7],posAdj);
@@ -423,9 +420,8 @@ function DISPLAY_FrontCenter(xMove,posAdj) {
 	if (!xMove) xMove=0;
 	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
-
 	ctx.save();
-	// ctx.translate(125+xMove,125);
+	ctx.translate(0+xMove,0);
 	ctx.scale(.75,.75);
 	drawPosition(allObjects[8],posAdj);
 	ctx.restore();
@@ -436,10 +432,6 @@ function DISPLAY_Left(xMove,posAdj) {
 	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
-	// let region = new Path2D();
-	// region.rect(0,0,500,1000);
-	// // ctx.stroke();
-	// ctx.clip(region);
 	ctx.translate(-1500+xMove,0);
 	ctx.scale(1.5,1.5);
 	drawPosition(allObjects[9],posAdj);
@@ -451,10 +443,6 @@ function DISPLAY_Right(xMove,posAdj) {
 	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
-	// let region = new Path2D();
-	// region.rect(500,0,500,1000);
-	// // ctx.stroke();
-	// ctx.clip(region);
 	ctx.translate(1500+xMove,0);
 	ctx.scale(1.5,1.5);
 	drawPosition(allObjects[10],posAdj);
@@ -467,7 +455,7 @@ function DISPLAY_Current(xMove,posAdj) {
 	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
-	// ctx.translate(-250+xMove,-250);
+	ctx.translate(0+xMove,0);
 	ctx.scale(1.5,1.5);
 	drawPosition(allObjects[11],posAdj);
 	ctx.restore();
@@ -485,23 +473,46 @@ const wall = {
 	right   : [500,-500,250,-250,250,250,500,500],
 	ceiling : [-500,-500,-500,-250,500,-250,500,0],
 	floor   : [-500,500,-500,250,500,250,500,500],
-	front   : [-250,-250,250,250,250,250,-250,250],
+	front   : [-250,-250,250,-250,250,250,-250,250],
 	behind  : [0,0,0,0,0,0,0,0],
 
 	draw    : function(ctx,wallType,fill,posAdj) {
 		if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
+		if (wallType == wall.front) posAdj[1]=posAdj[1]*-1, posAdj[7]=posAdj[7]*-1,posAdj[2]=Math.abs(posAdj[2]);
 		this.ctx = ctx;
 		this.ctx.beginPath();
 		this.ctx.fillStyle=fill;
-		this.ctx.moveTo(wallType[0]+posAdj[0],wallType[1]+posAdj[1]);
-		this.ctx.lineTo(wallType[2]+posAdj[2],wallType[3]+posAdj[3]);
-		this.ctx.lineTo(wallType[4]+posAdj[4],wallType[5]+posAdj[5]);
-		this.ctx.lineTo(wallType[6]+posAdj[6],wallType[7]+posAdj[7]);
+		//CORNER
+		this.ctx.moveTo(vanishingPoint[0],wallType[1]+posAdj[1]);
 		this.ctx.lineTo(wallType[0]+posAdj[0],wallType[1]+posAdj[1]);
+		this.ctx.lineTo(wallType[0]+posAdj[0],vanishingPoint[1]);
+		this.ctx.lineTo(vanishingPoint[0],vanishingPoint[1]);
+		this.ctx.lineTo(vanishingPoint[0],wallType[1]+posAdj[1]);
+
+		this.ctx.moveTo(vanishingPoint[0],wallType[3]+posAdj[3]);
+		this.ctx.lineTo(wallType[2]+posAdj[2],wallType[3]+posAdj[3]);
+		this.ctx.lineTo(wallType[2]+posAdj[2],vanishingPoint[1]);
+		this.ctx.lineTo(vanishingPoint[0],vanishingPoint[1]);
+		this.ctx.lineTo(vanishingPoint[0],wallType[3]+posAdj[3]);
+
+		this.ctx.moveTo(vanishingPoint[0],wallType[5]+posAdj[5]);
+		this.ctx.lineTo(wallType[4]+posAdj[4],wallType[5]+posAdj[5]);
+		this.ctx.lineTo(wallType[4]+posAdj[4],vanishingPoint[1]);
+		this.ctx.lineTo(vanishingPoint[0],vanishingPoint[1]);
+		this.ctx.lineTo(vanishingPoint[0],wallType[5]+posAdj[5]);
+
+		this.ctx.moveTo(vanishingPoint[0],wallType[7]+posAdj[7]);
+		this.ctx.lineTo(wallType[6]+posAdj[6],wallType[7]+posAdj[7]);
+		this.ctx.lineTo(wallType[6]+posAdj[6],vanishingPoint[1]);
+		this.ctx.lineTo(vanishingPoint[0],vanishingPoint[1]);
+		this.ctx.lineTo(vanishingPoint[0],wallType[7]+posAdj[7]);
+		
+		
+		this.ctx.stroke();
 		this.ctx.fill();
 		this.ctx.closePath();
 		this.ctx.beginPath();
-		this.bricks(wallType,posAdj);
+		// this.bricks(wallType,posAdj);
 		this.ctx.closePath();
 		
 		
@@ -534,7 +545,7 @@ function setVars() {
 	wall.right    = [500,-500,250,-250,250,250,500,500];
 	wall.ceiling  = [-500,-500,-500,-250,500,-250,500,0];
 	wall.floor    = [-500,500,-500,250,500,250,500,500];
-	wall.front    = [-250,-250,250,250,250,250,-250,250];
+	wall.front    = [-250,-250,250,-250,250,250,-250,250];
 	wall.behind   = [0,0,0,0,0,0,0,0];
 };
 
@@ -549,9 +560,7 @@ function GAME_moveForward() {
 		c[3]+=.0025;
 		ctx.save();
 		
-		// ctx.scale(1+c[2],1+c[2]);
-		// ctx.translate(-c[1],-c[1]);
-		ctx.transform(1+c[2],0,0,1+c[2],-c[1],-c[1]);
+		ctx.transform(1+c[2],0,0,1+c[2],0,0);
 		DISPLAY_renderAllBoxes(.3-c[3]);
 
 		ctx.restore();
@@ -563,14 +572,22 @@ function GAME_moveForward() {
 };
 
 function GAME_turnRight() {
-	let c=[0,0,0,0,0,0,0,0];
+	let c=[0,0,0,0,0,0,0,0,0,0,0];
 	
 
 	let animation = setInterval(function() {
-		ctx.clearRect(-500,-500,1000,1000);
+		backgroundArt(.8)
 		c[0]+=1;
 		c[1]+=(750/60);
 		c[2]+=(250/60);
+		c[3]+=(1125/60);
+		c[4]+=(500/60);
+		c[5]+=(1125/60);
+		c[6]+=(1500/60);
+		c[7]+=(1750/60);
+		c[8]+=(2250/60);
+		c[9]+=(1250/60);
+		
 
 
 		
@@ -581,37 +598,80 @@ function GAME_turnRight() {
 			// DISPLAY_MiddleCenter(-c[6] ,[-c[2] ,-c[1] ,-c[3] ,-c[3] ,-c[3] ,c[3] ,-c[2] ,c[1]   ]);
 			// DISPLAY_FrontCenter(-c[5]  ,[-c[2] ,0     ,-c[3] ,-c[2] ,-c[3] ,c[2] ,-c[2] ,0      ]);
 			
-			DISPLAY_Current(0,[
-				0,0,
-				0,0,
-				0,0,
-				0,0
-				]);
-			// ctx.setTransform(1,0,0,1,0,0)
-			
 
+			DISPLAY_BackCenter(-c[8],[
+				c[6],-c[6],
+				-c[8],-c[7],
+				-c[8],c[7],
+				c[6],c[6]
+				]);
+
+			DISPLAY_MiddleCenter(-c[6],[
+				c[4],-c[4],
+				-c[9],-c[1],
+				-c[9],c[1],
+				c[4],c[4]
+				]);
+
+			DISPLAY_FrontCenter(-c[5],[
+				c[4],0,
+				-c[2],-c[2],
+				-c[2],c[2],
+				c[4],0
+				]);
+
+			DISPLAY_Current(-c[1],[
+				c[2],c[2],
+				0,0,
+				0,0,
+				c[2],-c[2]
+				]);
+
+			// ctx.setTransform(1,0,0,1,0,0)
 
 		}
 		else {
 			if (c[0]==29) {
-				wall.left  = wall.front;
-				wall.front = wall.right;
-
-				LOGIC_rotate("YAW", 1);	
+				// wall.left  = wall.front;
+				// wall.front = wall.right;
+				
 			}
 
 			
 			// DISPLAY_MiddleCenter(-c[6] ,[-c[2] ,-c[1] ,-c[3] ,-c[3] ,-c[3] ,c[3] ,-c[2] ,c[1]   ]);
 			// DISPLAY_FrontCenter(-c[5]  ,[-c[2] ,0     ,-c[3] ,-c[2] ,-c[3] ,c[2] ,-c[2] ,0      ]);
-	
-			DISPLAY_Current(0,[
-				0,0,
-				0,0,
-				0,0,
-				0,0
+			
+			DISPLAY_BackCenter(-c[8],[
+				c[6],-c[6],
+				-c[8],-c[7],
+				-c[8],c[7],
+				c[6],c[6]
 				]);
-			// ctx.setTransform(1,0,0,1,0,0)
 
+			DISPLAY_MiddleCenter(-c[6],[
+				c[4],-c[4],
+				-c[9],-c[1],
+				-c[9],c[1],
+				c[4],c[4]
+				]);
+
+			DISPLAY_FrontCenter(-c[5],[
+				c[4],0,
+				-c[2],-c[2],
+				-c[2],c[2],
+				c[4],0
+				]);
+
+			DISPLAY_Current(-c[1],[
+				c[2],c[2],
+				0,0,
+				0,0,
+				c[2],-c[2]
+				]);
+
+
+
+			// ctx.setTransform(1,0,0,1,0,0)
 			
 
 			// ctx.save()
@@ -628,7 +688,7 @@ function GAME_turnRight() {
 
 
 
-		if (c[0]>59) clearInterval(animation),setVars(),DISPLAY_renderAllBoxes(); 
+		if (c[0]>59) clearInterval(animation),setVars(),LOGIC_rotate("YAW", 1),backgroundArt(1),DISPLAY_renderAllBoxes();  //
 	}, 1000/FPS);
 
 }
