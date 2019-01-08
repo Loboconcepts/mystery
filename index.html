@@ -6,7 +6,9 @@
 <body style="background-color:#333333;">
 	<canvas id="canvas">Your browser does not support the HTML5 canvas tag.</canvas>
 	<br>
-	<input oninput="slider(this.value)" id="slider" type="range" min="-2800" max="2800" value="0">
+	<input oninput="tpoint(this.value)" id="tpoint" type="range" min="-2800" max="2800" value="0">
+
+	<input oninput="vpoint(this.value)" id="vpoint" type="range" min="-500" max="500" value="0">
 	<script src="js/engine.js"></script>
 	<script type="text/javascript">
 		axisFinder();
@@ -17,32 +19,76 @@
 		DISPLAY_renderAllBoxes(.3)
 		
 		
-		function slider(val) {
+		
+
+		function vpoint(val) {
+
 			ctx.clearRect(-500,-500,1000,1000)
+			
+
+			
+			vanishingPoint = [val,0];
+			backgroundArt(1);
+			DISPLAY_renderAllBoxes(.3);
+			ctx.beginPath()
+			ctx.strokeStyle="#000000"
+			ctx.moveTo(-500,parseInt(val))
+			ctx.lineTo(vanishingPoint[0],vanishingPoint[1])
+			ctx.moveTo(500,250-parseInt(val))
+			ctx.lineTo(vanishingPoint[0],vanishingPoint[1])
+			ctx.moveTo(500,-500-parseInt(val))
+			ctx.lineTo(vanishingPoint[0],vanishingPoint[1])
+			ctx.moveTo(-500,500-parseInt(val))
+			ctx.lineTo(vanishingPoint[0],vanishingPoint[1])
+			ctx.moveTo(-500,-170+parseInt(val))
+			ctx.lineTo(vanishingPoint[0],vanishingPoint[1])
+			ctx.moveTo(500,170-parseInt(val))
+			ctx.lineTo(vanishingPoint[0],vanishingPoint[1])
+			ctx.moveTo(-500,170+parseInt(val))
+			ctx.lineTo(vanishingPoint[0],vanishingPoint[1])
+			ctx.moveTo(500,-170-parseInt(val))
+			ctx.lineTo(vanishingPoint[0],vanishingPoint[1])
+			ctx.stroke()
+			ctx.closePath()
+			
+
+		}
+
+		function tpoint(val) {
+
+			ctx.clearRect(-500,-500,1000,1000);
 			
 
 			ctx.save();
 			ctx.translate(val,0);
-			backgroundArt(1)
+			backgroundArt(1);
 			DISPLAY_renderAllBoxes(.3);
 			ctx.restore();
 
-		}
+		};
 
 
 
-ctx.beginPath()
-ctx.strokeStyle="#000000"
-ctx.moveTo(-500,-500)
-ctx.lineTo(500,500)
-ctx.moveTo(500,-500)
-ctx.lineTo(-500,500)
-ctx.moveTo(-500,-170)
-ctx.lineTo(500,170)
-ctx.moveTo(-500,170)
-ctx.lineTo(500,-170)
-ctx.stroke()
-ctx.closePath()
+// ctx.beginPath()
+// ctx.strokeStyle="#000000"
+// ctx.moveTo(-500,-500)
+// ctx.lineTo(vanishingPoint[0],vanishingPoint[1])
+// ctx.moveTo(500,500)
+// ctx.lineTo(vanishingPoint[0],vanishingPoint[1])
+// ctx.moveTo(500,-500)
+// ctx.lineTo(vanishingPoint[0],vanishingPoint[1])
+// ctx.moveTo(-500,500)
+// ctx.lineTo(vanishingPoint[0],vanishingPoint[1])
+// ctx.moveTo(-500,-170)
+// ctx.lineTo(vanishingPoint[0],vanishingPoint[1])
+// ctx.moveTo(500,170)
+// ctx.lineTo(vanishingPoint[0],vanishingPoint[1])
+// ctx.moveTo(-500,170)
+// ctx.lineTo(vanishingPoint[0],vanishingPoint[1])
+// ctx.moveTo(500,-170)
+// ctx.lineTo(vanishingPoint[0],vanishingPoint[1])
+// ctx.stroke()
+// ctx.closePath()
 
 	</script>
 
