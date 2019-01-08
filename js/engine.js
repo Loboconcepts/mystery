@@ -305,30 +305,30 @@ function DISPLAY_renderAllBoxes() {
 	// ctx.clearRect(-500,-500,1000,1000);
 	ctx.beginPath();
 
-	DISPLAY_BackLeft(0,[0,0,500,0,500,0,0,0,0]);
-	DISPLAY_BackRight(0,[0,0,-500,0,-500,0,0,0,0]);
+	// DISPLAY_BackLeft(0,[0,0,0,0,0,0,0,0,0]);
+	// DISPLAY_BackRight(0,[0,0,0,0,0,0,0,0,0]);
 	
 	
-	DISPLAY_MiddleLeft(0,[0,0,500,0,500,0,0,0,0]);
-	DISPLAY_MiddleRight(0,[0,0,-500,0,-500,0,0,0,0]);
+	// DISPLAY_MiddleLeft(0,[0,0,0,0,0,0,0,0,0]);
+	// DISPLAY_MiddleRight(0,[0,0,0,0,0,0,0,0,0]);
 	
 	
-	DISPLAY_FrontLeft(0,[0,0,500,0,500,0,0,0,0]);
-	DISPLAY_FrontRight(0,[0,0,-500,0,-500,0,0,0,0]);
+	// DISPLAY_FrontLeft(0,[0,0,0,0,0,0,0,0,0]);
+	// DISPLAY_FrontRight(0,[0,0,0,0,0,0,0,0,0]);
 	
 	
-	DISPLAY_Left(0,[0,0,500,0,500,0,0,0,0]);
-	DISPLAY_Right(0,[0,0,-500,0,-500,0,0,0,0]);
+	// DISPLAY_Left(0,[0,0,0,0,0,0,0,0,0]);
+	// DISPLAY_Right(0,[0,0,0,0,0,0,0,0,0]);
 	
 	
 	
 	
 
-	DISPLAY_BackCenter(0,[0,0,0,0,0,0,0,0]);
-	DISPLAY_MiddleCenter(0,[0,0,0,0,0,0,0,0]);
+	// DISPLAY_BackCenter(0,[0,0,0,0,0,0,0,0]);
+	// DISPLAY_MiddleCenter(0,[0,0,0,0,0,0,0,0]);
 	DISPLAY_FrontCenter(0,[0,0,0,0,0,0,0,0]);
 	
-	DISPLAY_Current(0,[0,0,0,0,0,0,0,0]);
+	// DISPLAY_Current(0,[0,0,0,0,0,0,0,0]);
 
 	ctx.closePath();
 };
@@ -338,9 +338,15 @@ function DISPLAY_BackLeft(xMove,posAdj) {
 	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
-	ctx.translate(-190+xMove,0);
+	// ctx.translate(-190+xMove,0);
+	var a = [-1000,0,-500,0,-500,0,-1000,0],
+		b = posAdj;
+	var c = a.map(function(item,index) {
+		return item+b[index];
+	})
+	console.log(c)
 	ctx.scale(.19,.19);
-	drawPosition(allObjects[0],posAdj);
+	drawPosition(allObjects[0],c);
 	ctx.restore();
 };
 function DISPLAY_BackRight(xMove,posAdj) {
@@ -348,9 +354,13 @@ function DISPLAY_BackRight(xMove,posAdj) {
 	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
-	ctx.translate(190+xMove,0);
+	var a = [1000,0,500,0,500,0,1000,0],
+		b = posAdj;
+	var c = a.map(function(item,index) {
+		return item+b[index];
+	})
 	ctx.scale(.19,.19);
-	drawPosition(allObjects[1],posAdj);
+	drawPosition(allObjects[1],c);
 	ctx.restore();
 };
 function DISPLAY_BackCenter(xMove,posAdj) {
@@ -358,7 +368,8 @@ function DISPLAY_BackCenter(xMove,posAdj) {
 	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
-	ctx.translate(0+xMove,0);
+	// ctx.translate(0+xMove,0);
+	posAdj = [0,0,0,0,0,0,0,0];
 	ctx.scale(.19,.19);
 	drawPosition(allObjects[2],posAdj);
 	ctx.restore();
@@ -369,19 +380,28 @@ function DISPLAY_MiddleLeft(xMove,posAdj) {
 	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
-	ctx.translate(-380+xMove,0);
+	var a = [-1000,0,-500,0,-500,0,-1000,0],
+		b = posAdj;
+	var c = a.map(function(item,index) {
+		return item+b[index];
+	})
 	ctx.scale(.38,.38);
-	drawPosition(allObjects[3],posAdj);
+	drawPosition(allObjects[3],c);
 	ctx.restore();
 };
 function DISPLAY_MiddleRight(xMove,posAdj) {
 	if (!xMove) xMove=0;
 	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
+	var a = [1000,0,500,0,500,0,1000,0],
+		b = posAdj;
+	var c = a.map(function(item,index) {
+		return item+b[index];
+	})
 	ctx.save();
-	ctx.translate(380+xMove,0);
+	// ctx.translate(380+xMove,0);
 	ctx.scale(.38,.38);
-	drawPosition(allObjects[4],posAdj);
+	drawPosition(allObjects[4],c);
 	ctx.restore();
 };
 function DISPLAY_MiddleCenter(xMove,posAdj) {
@@ -400,19 +420,28 @@ function DISPLAY_FrontLeft(xMove,posAdj) {
 	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
-	ctx.translate(-750+xMove,0);
+	var a = [-1000,0,-500,0,-500,0,-1000,0],
+		b = posAdj;
+	var c = a.map(function(item,index) {
+		return item+b[index];
+	})
 	ctx.scale(.75,.75);
-	drawPosition(allObjects[6],posAdj);
+	drawPosition(allObjects[6],c);
 	ctx.restore();
 };
 function DISPLAY_FrontRight(xMove,posAdj) {
 	if (!xMove) xMove=0;
 	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
+	var a = [1000,0,500,0,500,0,1000,0],
+		b = posAdj;
+	var c = a.map(function(item,index) {
+		return item+b[index];
+	})
 	ctx.save();
-	ctx.translate(750+xMove,0);
+	// ctx.translate(750+xMove,0);
 	ctx.scale(.75,.75,);
-	drawPosition(allObjects[7],posAdj);
+	drawPosition(allObjects[7],c);
 	ctx.restore();
 };
 
@@ -432,9 +461,13 @@ function DISPLAY_Left(xMove,posAdj) {
 	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
 	ctx.save();
-	ctx.translate(-1500+xMove,0);
+	var a = [-1000,0,-500,0,-500,0,-1000,0],
+		b = posAdj;
+	var c = a.map(function(item,index) {
+		return item+b[index];
+	})
 	ctx.scale(1.5,1.5);
-	drawPosition(allObjects[9],posAdj);
+	drawPosition(allObjects[9],c);
 	ctx.restore();
 };	
 
@@ -442,10 +475,15 @@ function DISPLAY_Right(xMove,posAdj) {
 	if (!xMove) xMove=0;
 	if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
 	var allObjects = drawingWhat();
+	var a = [1000,0,500,0,500,0,1000,0],
+		b = posAdj;
+	var c = a.map(function(item,index) {
+		return item+b[index];
+	})
 	ctx.save();
-	ctx.translate(1500+xMove,0);
+	// ctx.translate(1500+xMove,0);
 	ctx.scale(1.5,1.5);
-	drawPosition(allObjects[10],posAdj);
+	drawPosition(allObjects[10],c);
 	ctx.restore();
 };
 
@@ -478,46 +516,56 @@ const wall = {
 
 	draw    : function(ctx,wallType,fill,posAdj) {
 		if (!posAdj) posAdj = [0,0,0,0,0,0,0,0];
-		// if (wallType == wall.front) posAdj[1]=posAdj[1]*-1, posAdj[7]=posAdj[7]*-1,posAdj[2]=Math.abs(posAdj[2]);
-		let topSlope = this.slope(wallType[0]+posAdj[0],wallType[1]+posAdj[1],wallType[2]+posAdj[2],wallType[3]+posAdj[3]);
-		let botSlope = this.slope(wallType[4]+posAdj[4],wallType[5]+posAdj[5],wallType[6]+posAdj[6],wallType[7]+posAdj[7]);
 		this.ctx = ctx;
 		this.ctx.beginPath();
 		this.ctx.fillStyle=fill;
-		
+		if (wallType == wall.front) {
+			this.ctx.moveTo(wallType[0]+posAdj[2],wallType[1]+posAdj[3]);
+			this.ctx.lineTo(wallType[2]+posAdj[2],wallType[3]+posAdj[3]);
+			this.ctx.lineTo(wallType[4]+posAdj[2],wallType[5]-posAdj[3]);
+			this.ctx.lineTo(wallType[6]+posAdj[2],wallType[7]-posAdj[3]);
+			this.ctx.lineTo(wallType[8]+posAdj[2],wallType[1]+posAdj[3]);
+		}
+		else {
+			let topSlope = this.slope(wallType[0]+posAdj[0],wallType[1]+posAdj[1],wallType[2]+posAdj[2],wallType[3]+posAdj[3]);
+			let botSlope = this.slope(wallType[4]+posAdj[4],wallType[5]+posAdj[5],wallType[6]+posAdj[6],wallType[7]+posAdj[7]);
+			
+			
 
-		this.ctx.moveTo(topSlope[0],topSlope[1]);
-		this.ctx.lineTo(topSlope[2],topSlope[3]);
-		this.ctx.lineTo(botSlope[0],botSlope[1]);
-		this.ctx.lineTo(botSlope[2],botSlope[3]);
-		this.ctx.lineTo(topSlope[0],topSlope[1]);
+			this.ctx.moveTo(topSlope[0],topSlope[1]);
+			this.ctx.lineTo(topSlope[2],topSlope[3]);
+			this.ctx.lineTo(botSlope[0],botSlope[1]);
+			this.ctx.lineTo(botSlope[2],botSlope[3]);
+			this.ctx.lineTo(topSlope[0],topSlope[1]);
 
 
-		// this.ctx.moveTo(vanishingPoint[0],wallType[1]+posAdj[1]);
-		// this.ctx.lineTo(wallType[0]+posAdj[0],wallType[1]+posAdj[1]);
-		// this.ctx.lineTo(wallType[0]+posAdj[0],vanishingPoint[1]);
-		// this.ctx.lineTo(vanishingPoint[0],vanishingPoint[1]);
-		// this.ctx.lineTo(vanishingPoint[0],wallType[1]+posAdj[1]);
+			// this.ctx.moveTo(vanishingPoint[0],wallType[1]+posAdj[1]);
+			// this.ctx.lineTo(wallType[0]+posAdj[0],wallType[1]+posAdj[1]);
+			// this.ctx.lineTo(wallType[0]+posAdj[0],vanishingPoint[1]);
+			// this.ctx.lineTo(vanishingPoint[0],vanishingPoint[1]);
+			// this.ctx.lineTo(vanishingPoint[0],wallType[1]+posAdj[1]);
 
-		// this.ctx.moveTo(vanishingPoint[0],wallType[3]+posAdj[3]);
-		// this.ctx.lineTo(wallType[2]+posAdj[2],wallType[3]+posAdj[3]);
-		// this.ctx.lineTo(wallType[2]+posAdj[2],vanishingPoint[1]);
-		// this.ctx.lineTo(vanishingPoint[0],vanishingPoint[1]);
-		// this.ctx.lineTo(vanishingPoint[0],wallType[3]+posAdj[3]);
+			// this.ctx.moveTo(vanishingPoint[0],wallType[3]+posAdj[3]);
+			// this.ctx.lineTo(wallType[2]+posAdj[2],wallType[3]+posAdj[3]);
+			// this.ctx.lineTo(wallType[2]+posAdj[2],vanishingPoint[1]);
+			// this.ctx.lineTo(vanishingPoint[0],vanishingPoint[1]);
+			// this.ctx.lineTo(vanishingPoint[0],wallType[3]+posAdj[3]);
 
-		// this.ctx.moveTo(vanishingPoint[0],wallType[5]+posAdj[5]);
-		// this.ctx.lineTo(wallType[4]+posAdj[4],wallType[5]+posAdj[5]);
-		// this.ctx.lineTo(wallType[4]+posAdj[4],vanishingPoint[1]);
-		// this.ctx.lineTo(vanishingPoint[0],vanishingPoint[1]);
-		// this.ctx.lineTo(vanishingPoint[0],wallType[5]+posAdj[5]);
+			// this.ctx.moveTo(vanishingPoint[0],wallType[5]+posAdj[5]);
+			// this.ctx.lineTo(wallType[4]+posAdj[4],wallType[5]+posAdj[5]);
+			// this.ctx.lineTo(wallType[4]+posAdj[4],vanishingPoint[1]);
+			// this.ctx.lineTo(vanishingPoint[0],vanishingPoint[1]);
+			// this.ctx.lineTo(vanishingPoint[0],wallType[5]+posAdj[5]);
 
-		// this.ctx.moveTo(vanishingPoint[0],wallType[7]+posAdj[7]);
-		// this.ctx.lineTo(wallType[6]+posAdj[6],wallType[7]+posAdj[7]);
-		// this.ctx.lineTo(wallType[6]+posAdj[6],vanishingPoint[1]);
-		// this.ctx.lineTo(vanishingPoint[0],vanishingPoint[1]);
-		// this.ctx.lineTo(vanishingPoint[0],wallType[7]+posAdj[7]);
-		
-		
+			// this.ctx.moveTo(vanishingPoint[0],wallType[7]+posAdj[7]);
+			// this.ctx.lineTo(wallType[6]+posAdj[6],wallType[7]+posAdj[7]);
+			// this.ctx.lineTo(wallType[6]+posAdj[6],vanishingPoint[1]);
+			// this.ctx.lineTo(vanishingPoint[0],vanishingPoint[1]);
+			// this.ctx.lineTo(vanishingPoint[0],wallType[7]+posAdj[7]);
+			
+			
+			
+		};
 		this.ctx.stroke();
 		this.ctx.fill();
 		this.ctx.closePath();
@@ -546,12 +594,12 @@ const wall = {
 	slope    : function(x1, y1, x2, y2) {
 		
 		if (Math.abs(x1)>Math.abs(x2)) {
-			let slope = (y1-y2)/(x1-x2);
+			let slope = (y1-vanishingPoint[1])/(x1-vanishingPoint[0]);
 			y2 = slope*x2+(y1+(-(slope)*x1));
 			return [x1,y1,x2,y2];
 		}
 		else if(Math.abs(x2)>Math.abs(x1)) {
-			let slope = (y2-y1)/(x2-x1);
+			let slope = (y2-vanishingPoint[1])/(x2-vanishingPoint[0]);
 			y1 = slope*x1+(y2+(-(slope)*x2))
 			return [x1,y1,x2,y2];
 		}
@@ -567,6 +615,7 @@ const wall = {
 var FPS = 60;
 
 function setVars() {
+	vanishingPoint = [0,0];
 	wall.left     = [-500,-500,-250,-250,-250,250,-500,500];
 	wall.right    = [500,-500,250,-250,250,250,500,500];
 	wall.ceiling  = [-500,-500,-500,-250,500,-250,500,0];
@@ -615,7 +664,8 @@ function GAME_turnRight() {
 		c[9]+=(1250/60);
 		
 
-
+		vanishingPoint = [-c[1],0];
+		// DISPLAY_FrontCenter(0,[0,0,0,0,0,0,0,0]);
 		
 		
 		if (c[0]<29) {
@@ -625,19 +675,19 @@ function GAME_turnRight() {
 			// DISPLAY_FrontCenter(-c[5]  ,[-c[2] ,0     ,-c[3] ,-c[2] ,-c[3] ,c[2] ,-c[2] ,0      ]);
 			
 
-			DISPLAY_BackCenter(-c[8],[
-				c[6],-c[6],
-				-c[8],-c[7],
-				-c[8],c[7],
-				c[6],c[6]
-				]);
+			// DISPLAY_BackCenter(-c[8],[
+			// 	c[6],-c[6],
+			// 	-c[8],-c[7],
+			// 	-c[8],c[7],
+			// 	c[6],c[6]
+			// 	]);
 
-			DISPLAY_MiddleCenter(-c[6],[
-				c[4],-c[4],
-				-c[9],-c[1],
-				-c[9],c[1],
-				c[4],c[4]
-				]);
+			// DISPLAY_MiddleCenter(-c[6],[
+			// 	c[4],-c[4],
+			// 	-c[9],-c[1],
+			// 	-c[9],c[1],
+			// 	c[4],c[4]
+			// 	]);
 
 			DISPLAY_FrontCenter(-c[5],[
 				c[4],0,
@@ -646,40 +696,40 @@ function GAME_turnRight() {
 				c[4],0
 				]);
 
-			DISPLAY_Current(-c[1],[
-				c[2],c[2],
-				0,0,
-				0,0,
-				c[2],-c[2]
-				]);
+			// DISPLAY_Current(-c[1],[
+			// 	c[2],c[2],
+			// 	0,0,
+			// 	0,0,
+			// 	c[2],-c[2]
+			// 	]);
 
 			// ctx.setTransform(1,0,0,1,0,0)
 
 		}
 		else {
-			if (c[0]==29) {
-				wall.left  = wall.front;
-				wall.front = wall.right;
-				LOGIC_rotate("YAW", 1);
-			}
+			// if (c[0]==29) {
+			// 	wall.left  = wall.front;
+			// 	wall.front = wall.right;
+			// 	LOGIC_rotate("YAW", 1);
+			// }
 
 			
 			// DISPLAY_MiddleCenter(-c[6] ,[-c[2] ,-c[1] ,-c[3] ,-c[3] ,-c[3] ,c[3] ,-c[2] ,c[1]   ]);
 			// DISPLAY_FrontCenter(-c[5]  ,[-c[2] ,0     ,-c[3] ,-c[2] ,-c[3] ,c[2] ,-c[2] ,0      ]);
 			
-			DISPLAY_BackCenter(-c[8],[
-				c[6],-c[6],
-				-c[8],-c[7],
-				-c[8],c[7],
-				c[6],c[6]
-				]);
+			// DISPLAY_BackCenter(-c[8],[
+			// 	c[6],-c[6],
+			// 	-c[8],-c[7],
+			// 	-c[8],c[7],
+			// 	c[6],c[6]
+			// 	]);
 
-			DISPLAY_MiddleCenter(-c[6],[
-				c[4],-c[4],
-				-c[9],-c[1],
-				-c[9],c[1],
-				c[4],c[4]
-				]);
+			// DISPLAY_MiddleCenter(-c[6],[
+			// 	c[4],-c[4],
+			// 	-c[9],-c[1],
+			// 	-c[9],c[1],
+			// 	c[4],c[4]
+			// 	]);
 
 			DISPLAY_FrontCenter(-c[5],[
 				c[4],0,
@@ -688,12 +738,12 @@ function GAME_turnRight() {
 				c[4],0
 				]);
 
-			DISPLAY_Current(-c[1],[
-				c[2],c[2],
-				0,0,
-				0,0,
-				c[2],-c[2]
-				]);
+			// DISPLAY_Current(-c[1],[
+			// 	c[2],c[2],
+			// 	0,0,
+			// 	0,0,
+			// 	c[2],-c[2]
+			// 	]);
 
 
 
