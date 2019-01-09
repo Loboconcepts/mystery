@@ -1,189 +1,3 @@
-// trace
-
-var MAX_LINES = 12;
-var begin = '<ul><li>';
-var middle = '</li><li>';
-var end = '</li></ul>';
-
-function trace(msg){
-
-}
-
-// function trace(msg) {
-//   var output_window = document.getElementById("trace");
-//   var lines = output_window.innerHTML.toLowerCase();
-//   var lineList;
-
-//   if (lines.length > 0) {
-//     lineList = lines.substring(begin.length, lines.length - end.length).split(middle);
-//     while (lineList.length >= MAX_LINES) { lineList.shift(); }
-//     lineList.push(msg);
-//   }
-//   else {
-//     lineList = [ msg ];
-//   }
-
-//   output_window.innerHTML = begin +lineList.join(middle) +end;
-// }
-
-// input
-
-var KEY = {
-  D: 68,
-  W: 87,
-  A: 65,
-  S:83,
-  RIGHT:39,
-  UP:38,
-  LEFT:37,
-  DOWN:40,
-  Q:81
-};
-
-var input = {
-  right: false,
-  up: false,
-  left: false,
-  down: false,
-  quit: false,
-  look_x: false,
-  look_y: false
-};
-
-function press(evt) {
-  var code = evt.keyCode;
-  switch(code) {
-    case KEY.RIGHT:
-    case KEY.D: input.right = true; break;
-
-    case KEY.UP:
-    case KEY.W: input.up = true; break;
-
-    case KEY.LEFT:
-    case KEY.A: input.left = true; break;
- 
-    case KEY.DOWN:
-    case KEY.S: input.down = true; break;
- 
-    case KEY.Q: input.quit = true; break;
-  }
-}
-
-function release(evt) {
-  var code = evt.keyCode;
-  switch(code) {
-    case KEY.RIGHT:
-    case KEY.D: input.right = false; break;
-
-    case KEY.UP:
-    case KEY.W: input.up = false; break;
-
-    case KEY.LEFT:
-    case KEY.A: input.left = false; break;
-
-    case KEY.DOWN:
-    case KEY.S: input.down = false; break;
-
-    case KEY.Q: break;
-
-    // default: trace('unrecognized key code: ' +code); break;
-  }
-}
-
-function look(evt) {
-  if (evt.clientX && evt.clientY) {
-    input.look_x = evt.clientX;
-    input.look_y = evt.clientY;  
-  }
-  else {
-    input.look_x = false;
-    input.look_y = false;
-  }
-  
-}
-function stopLook(evt) {
-  input.look_x = false;
-  input.look_y = false;
-}
-
-// player
-
-function Player(s) {
-  this.health = 100;
-  this.speed = {
-    forward : s,
-    backward: 1 * s,
-    turn : 4 * s
-  };
-}
-
-// level
-
-function Level() {
-  this.CELLTYPE_OPEN = -1;
-  this.CELL_SIZE = 64; // using multiple of 2 for optimization
-  this.CELL_SIZE_SHIFT = 6; // x >> 6 = Math.floor(x/64)
-  this.CELL_HALF = this.CELL_SIZE >> 1; // must be integer
-
-  this.cellCount = { _x:0, _y:0 };
-  this.dimension = { _x:0, _y:0 };
-  this.spawnPoint = { _x:0, _y:0 };
-  this.colors = { ground:'#000000', sky:'#FFFFFF', wallsNear:0, wallsFar:0 };
-
-  this.map;
-  this.viewExtent;
-  this.walltypes;
-
-   this.parseMap = function(mapString, cols, rows) {
-      this.cellCount._x = cols;
-      this.cellCount._y = rows;
-      this.dimension._x = this.cellCount._x * this.CELL_SIZE;
-      this.dimension._y = this.cellCount._y * this.CELL_SIZE;
-
-      var parsedOk = false;
-
-      if (mapString.length != this.cellCount._x * this.cellCount._y) {
-        // trace("map size not equal to level dimensions");
-      }
-
-      else {
-        this.walltypes = "@#%&";
-        this.colors.ground = '#444455';
-        this.colors.sky = '#66AAFF';
-        this.colors.wallsNear = new Array(0xDD1111, 0x11DD11, 0x1111DD, 0x6611CC);
-        this.colors.wallsFar  = new Array(0x110000, 0x001100, 0x000011, 0x110022);
-        this.viewExtent = this.CELL_SIZE * 7;
-        var spawnChar = "P";
-
-        this.map = new Array();
-        for (var row = 0; row < this.cellCount._y; row++) {
-           var r = new Array();
-           for (var col = 0; col < this.cellCount._x; col++) {
-              var type = this.CELLTYPE_OPEN;
-              var c = mapString.charAt(row * this.cellCount._x + col);
-              if (c == spawnChar) {
-                type = this.CELLTYPE_OPEN;
-                this.spawnPoint._x = col * this.CELL_SIZE + this.CELL_HALF;
-                this.spawnPoint._y = row * this.CELL_SIZE + this.CELL_HALF;
-              }
-              else {
-                var i = this.walltypes.indexOf(c);
-                if (i > -1) { type = i; }
-              }
-              r.push(type);
-           }
-           this.map.push(r);
-        }
-        parsedOk = true;
-      }
-
-      return parsedOk;
-   }
-
- }
-
- // raycaster
-
 
 function RayCaster(canvas, w, h, z, level, player, inputBuffer) {
 
@@ -193,7 +7,7 @@ function RayCaster(canvas, w, h, z, level, player, inputBuffer) {
     this.TO_RADS = Math.PI / 180;
     this.TO_DEGS = 180 / Math.PI;
     this.INFINITY = 10000;
-    this.RES = { w:w, h:h, hh:h * .5 }; // .5 controls height angle
+    this.RES = { w:w, h:h, hh:h * .5 };
     this.FOV = 60 * this.TO_RADS;
     this.SLIVER_ARC = this.FOV / this.RES.w;
     this.TABLE_ENTRIES = Math.ceil(Math.PI * 2 / this.SLIVER_ARC);
@@ -224,16 +38,16 @@ function RayCaster(canvas, w, h, z, level, player, inputBuffer) {
     'e0','e1','e2','e3','e4','e5','e6','e7','e8','e9','ea','eb','ec','ed','ee','ef',
     'f0','f1','f2','f3','f4','f5','f6','f7','f8','f9','fa','fb','fc','fd','fe','ff'];
     this.PALETTE;
-    this.CENTERLINE_SHIFT = 0; //adjust player height
+    this.CENTERLINE_SHIFT = 0;
 
     this.camera = { position: { _x:-1, _y:-1}, direction: 0 }
    this.idle = false;
-   this.sliverWidth = z * .5; // this is the high definition
+   this.sliverWidth = z * 2; // normal 2- high def
     this.canvas = canvas;
    this.canvas.lineWidth = this.sliverWidth;
     this.level = level; //new Level();
     this.player = player; //new Player(8);
-    this.inputHappened = inputBuffer;//new Array(false, false, false, false);
+    this.keysPressed = inputBuffer;//new Array(false, false, false, false);
     
     this.update = function() {
     if (!this.idle) {
@@ -261,8 +75,6 @@ function RayCaster(canvas, w, h, z, level, player, inputBuffer) {
         var distance = { _x:0, _y:0 };
         var step = { _x:0, _y:0 };
         var mapScale = this.RES.h / this.level.dimension._y;
-
-
         var wallHeight = this.RES.h;
         
         var wallHalfHeight;
@@ -338,6 +150,7 @@ function RayCaster(canvas, w, h, z, level, player, inputBuffer) {
             wallBottom = Math.min(this.RES.h, wallCenter + wallHalfHeight);
             this.drawSliver(currentSliver, wallTop, wallBottom, sliverColor);
         }
+        
     }
     
     this.cast_north = function(hit, distance, step, ray) {
@@ -492,47 +305,21 @@ function RayCaster(canvas, w, h, z, level, player, inputBuffer) {
     this.processInput = function() {
      this.idle = true;
      
-        if (this.inputHappened.look_x < this.canvas.canvas.width/2 && this.inputHappened.look_x) {
+        if (this.keysPressed.left) {
             // rotate this.camera counter-clockwise
         this.idle = false;
         trace('turning left');
             this.camera.direction -= this.player.speed.turn;
             if (this.camera.direction < 0) { this.camera.direction += this.TABLE_ENTRIES; }
         }
-        if (this.inputHappened.look_x > this.canvas.canvas.width/2) {
+        if (this.keysPressed.right) {
             // rotate this.camera clockwise
         this.idle = false;
         trace('turning right');
             this.camera.direction += this.player.speed.turn;
             if (this.camera.direction >= this.TABLE_ENTRIES) { this.camera.direction -= this.TABLE_ENTRIES; }
         }
-        if (this.inputHappened.left) {
-            // strafe left
-        this.idle = false;
-        trace('moving left');
-            var newX = this.camera.position._x + this.player.speed.backward / this.TABLE_INV_SIN[this.camera.direction];
-            var newY = this.camera.position._y + this.player.speed.backward / -this.TABLE_INV_COS[this.camera.direction];
-            var row = newY >> this.level.CELL_SIZE_SHIFT;
-            var col = newX >> this.level.CELL_SIZE_SHIFT;
-            if (this.level.map[row][col] == this.level.CELLTYPE_OPEN) {
-                this.camera.position._x = newX;
-                this.camera.position._y = newY;
-            }
-        }
-        if (this.inputHappened.right) {
-            // strafe right
-        this.idle = false;
-        trace('moving right');
-            var newX = this.camera.position._x + this.player.speed.backward / -this.TABLE_INV_SIN[this.camera.direction];
-            var newY = this.camera.position._y + this.player.speed.backward / this.TABLE_INV_COS[this.camera.direction];
-            var row = newY >> this.level.CELL_SIZE_SHIFT;
-            var col = newX >> this.level.CELL_SIZE_SHIFT;
-            if (this.level.map[row][col] == this.level.CELLTYPE_OPEN) {
-                this.camera.position._x = newX;
-                this.camera.position._y = newY;
-            }
-        }
-        if (this.inputHappened.up) {
+        if (this.keysPressed.up) {
             // ensure next step will take this.camera into empty cell
         this.idle = false;
         trace('moving forward');
@@ -545,7 +332,7 @@ function RayCaster(canvas, w, h, z, level, player, inputBuffer) {
                 this.camera.position._y = newY;
             }
         }
-        if (this.inputHappened.down) {
+        if (this.keysPressed.down) {
             // ensure next step will take this.camera into empty cell
         this.idle = false;
         trace('moving backward');
@@ -627,7 +414,7 @@ function RayCaster(canvas, w, h, z, level, player, inputBuffer) {
         // walk around the unit circle, jotting down trig values along the way.
         // we need to look out for horizontal and vertical asymptotes, where tangent
         // goes to infinity, and substitute a grossly underestimated value that
-        // won't break our calculations.
+        // won't break our calculations. 
         // also, when we cross an asymptote, we'll record the index i
         // QUAD_
         var quadrant = 0;
@@ -703,10 +490,11 @@ function RayCaster(canvas, w, h, z, level, player, inputBuffer) {
         
         // pre-compute view correction values for each sliver
         this.TABLE_VIEW_CORRECTION = new Array();
-        var FOVangle = this.SLIVER_ARC * (-Math.round(this.FOV*.5));
+        var FOVangle = this.SLIVER_ARC * (-this.FOV*.5);
+        console.log(Math.cos(FOVangle),Math.sin(FOVangle))
         for (var sliver = 0; sliver < this.RES.w; sliver++) {
-            this.TABLE_VIEW_CORRECTION[sliver] = Math.cos(FOVangle); // minimal fish-eye
-            //this.TABLE_VIEW_CORRECTION[sliver] = 1 / Math.cos(FOVangle); // extra fish-eye! cool.
+            this.TABLE_VIEW_CORRECTION[sliver] = 1; // minimal fish-eye
+            // this.TABLE_VIEW_CORRECTION[sliver] = (Math.sin(FOVangle) + Math.cos(FOVangle))/2; // extra fish-eye! cool.
             FOVangle += this.SLIVER_ARC;
         }
     }

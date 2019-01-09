@@ -1,122 +1,28 @@
-
 <!DOCTYPE html>
 <html>
 <head>
-<title>Ray-caster</title>
-<script type="text/javascript" src="js/engine.js"></script>
-
-<script type="text/javascript">
-  var C2D, W, H, RC;
-  var fps = 40;
-  var mspf = 1000 / fps;
-  var updateInterval;
-  var quit = false;
-
-  function main() {
-    var c = document.getElementById('canvas');
-    if (c.getContext) {
-      initializeCanvas(c);
-      var P = new Player(2);
-      var L = new Level();
-      RC = new RayCaster(C2D, W, H, 4, L, P, input);
-      if (initializeLevel()) {
-        trace('map loaded successfully.');
-        trace("now casting...");
-        trace("  \'a\' - turn left");
-        trace("  \'d\' - turn right");
-        trace("  \'w\' - step forward");
-        trace("  \'s\' - step backward");
-        trace("  \'q\' - stop casting");
-        updateInterval = window.setInterval("update()", mspf);
-      }
-      else {
-        trace("map failed to load");
-      }
-    }
-
-    else {
-      trace('sorry.. you\'ll need a browser that supports the canvas tag,');
-      trace('like Safari or Firefox 1.5+ to see this demo.');
-    }
-  }
-
-  function initializeCanvas(c) {
-      C2D = c.getContext('2d');
-      C2D.lineWidth = 1;
-      C2D.globalAlpha = 1;
-      C2D.globalCompositeOperation = 'source-over';
-      W = c.width;
-      H = c.height;
-      trace('canvas initialized');
-  }
-
-  function initializeLevel() {
-    var mapCells_x = 16;
-    var mapCells_y = 16;
-    var M = '' +
-      '################' +
-      '#P @@@@@       #' +
-      '#  @   @ % # % #' +
-      '#  @       #   #' +
-      '#  @  @@       #' +
-      '#    &         #' +
-      '#   &          #' +
-      '#  &      &&   #' +
-      '#              #' +
-      '#  ##  #@%#@%  #' +
-      '#  #        #  #' +
-      '#  ###      #  #' +
-      '#  #        #  #' +
-      '#  ######## #  #' +
-      '#              #' +
-      '################';
-    var QR = '' +
-      '################' +
-      '#P             #' +
-      '#              #' +
-      '#              #' +
-      '#              #' +
-      '#              #' +
-      '#              #' +
-      '#              #' +
-      '#              #' +
-      '#       @@@@@  #' +
-      '#           @  #' +
-      '#       @   @  #' +
-      '#       @   @  #' +
-      '#       @@@@@  #' +
-      '#              #' +
-      '################';
-
-    trace('submitting map...');
-    return RC.loadMap(QR, mapCells_x, mapCells_y);
-  }
-RayCaster
-  function update() {
-    if (input.quit) {
-      input.quit = false;
-      window.clearInterval(updateInterval);
-      trace('raycaster halted.');
-    }
-    else {
-      RC.update();
-    }
-  }
-</script>
-
-<style type="text/css">
-body {
-  margin:0;
+  <title></title>
+  <style type="text/css">
+    body{
+  background-color:#2e2e2e;
+  color: #dedede;
+  image-rendering: -webkit-optimize-contrast;
 }
-canvas {
-  
-  
+#canv{
+  background: linear-gradient(
+    to bottom,
+    gray 0%,
+    black 40%,
+    black 60%,
+    #333 100%
+  );
 }
-</style>
+  </style>
 </head>
+<body>
+  <canvas id="canv" width="640" height="360"></canvas>
+<script src="js/engine/stats.js"></script>
+<script src="js/engine/main.js"></script>
 
-<body onload="main();" onkeydown="press(event);" onkeyup="release(event);">
-<!-- <div id="trace" class="window"><ul><li>RayCaster v.0.0.1</li></ul></div> -->
-<canvas style="cursor: none;" onmouseleave="stopLook(event)" onmousemove="look(event)" id="canvas" width="640" height="480"></canvas>
 </body>
 </html>
