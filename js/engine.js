@@ -1,785 +1,716 @@
-// Copyright 2006 Google Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//   http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// trace
 
+var MAX_LINES = 12;
+var begin = '<ul><li>';
+var middle = '</li><li>';
+var end = '</li></ul>';
 
-// Known Issues:
-//
-// * Patterns are not implemented.
-// * Radial gradient are not implemented. The VML version of these look very
-//   different from the canvas one.
-// * Clipping paths are not implemented.
-// * Coordsize. The width and height attribute have higher priority than the
-//   width and height style values which isn't correct.
-// * Painting mode isn't implemented.
-// * Canvas width/height should is using content-box by default. IE in
-//   Quirks mode will draw the canvas using border-box. Either change your
-//   doctype to HTML5
-//   (http://www.whatwg.org/specs/web-apps/current-work/#the-doctype)
-//   or use Box Sizing Behavior from WebFX
-//   (http://webfx.eae.net/dhtml/boxsizing/boxsizing.html)
-// * Optimize. There is always room for speed improvements.
+function trace(msg){
 
-// only add this code if we do not already have a canvas implementation
-if (!window.CanvasRenderingContext2D) {
+}
 
-(function () {
+// function trace(msg) {
+//   var output_window = document.getElementById("trace");
+//   var lines = output_window.innerHTML.toLowerCase();
+//   var lineList;
 
-  // alias some functions to make (compiled) code shorter
-  var m = Math;
-  var mr = m.round;
-  var ms = m.sin;
-  var mc = m.cos;
+//   if (lines.length > 0) {
+//     lineList = lines.substring(begin.length, lines.length - end.length).split(middle);
+//     while (lineList.length >= MAX_LINES) { lineList.shift(); }
+//     lineList.push(msg);
+//   }
+//   else {
+//     lineList = [ msg ];
+//   }
 
-  // this is used for sub pixel precision
-  var Z = 10;
-  var Z2 = Z / 2;
+//   output_window.innerHTML = begin +lineList.join(middle) +end;
+// }
 
-  var G_vmlCanvasManager_ = {
-    init: function (opt_doc) {
-      var doc = opt_doc || document;
-      if (/MSIE/.test(navigator.userAgent) && !window.opera) {
-        var self = this;
-        doc.attachEvent("onreadystatechange", function () {
-          self.init_(doc);
-        });
-      }
-    },
+// input
 
-    init_: function (doc) {
-      if (doc.readyState == "complete") {
-        // create xmlns
-        if (!doc.namespaces["g_vml_"]) {
-          doc.namespaces.add("g_vml_", "urn:schemas-microsoft-com:vml");
-        }
+var KEY = {
+  D: 68,
+  W: 87,
+  A: 65,
+  S:83,
+  RIGHT:39,
+  UP:38,
+  LEFT:37,
+  DOWN:40,
+  Q:81
+};
 
-        // setup default css
-        var ss = doc.createStyleSheet();
-        ss.cssText = "canvas{display:inline-block;overflow:hidden;" +
-            // default size is 300x150 in Gecko and Opera
-            "text-align:left;width:300px;height:150px}" +
-            "g_vml_\\:*{behavior:url(#default#VML)}";
+var input = {
+  right: false,
+  up: false,
+  left: false,
+  down: false,
+  quit: false,
+  look_x: false,
+  look_y: false
+};
 
-        // find all canvas elements
-        var els = doc.getElementsByTagName("canvas");
-        for (var i = 0; i < els.length; i++) {
-          if (!els[i].getContext) {
-            this.initElement(els[i]);
-          }
-        }
-      }
-    },
+function press(evt) {
+  var code = evt.keyCode;
+  switch(code) {
+    case KEY.RIGHT:
+    case KEY.D: input.right = true; break;
 
-    fixElement_: function (el) {
-      // in IE before version 5.5 we would need to add HTML: to the tag name
-      // but we do not care about IE before version 6
-      var outerHTML = el.outerHTML;
+    case KEY.UP:
+    case KEY.W: input.up = true; break;
 
-      var newEl = el.ownerDocument.createElement(outerHTML);
-      // if the tag is still open IE has created the children as siblings and
-      // it has also created a tag with the name "/FOO"
-      if (outerHTML.slice(-2) != "/>") {
-        var tagName = "/" + el.tagName;
-        var ns;
-        // remove content
-        while ((ns = el.nextSibling) && ns.tagName != tagName) {
-          ns.removeNode();
-        }
-        // remove the incorrect closing tag
-        if (ns) {
-          ns.removeNode();
-        }
-      }
-      el.parentNode.replaceChild(newEl, el);
-      return newEl;
-    },
-
-    /**
-     * Public initializes a canvas element so that it can be used as canvas
-     * element from now on. This is called automatically before the page is
-     * loaded but if you are creating elements using createElement you need to
-     * make sure this is called on the element.
-     * @param {HTMLElement} el The canvas element to initialize.
-     * @return {HTMLElement} the element that was created.
-     */
-    initElement: function (el) {
-      el = this.fixElement_(el);
-      el.getContext = function () {
-        if (this.context_) {
-          return this.context_;
-        }
-        return this.context_ = new CanvasRenderingContext2D_(this);
-      };
-
-      // do not use inline function because that will leak memory
-      el.attachEvent('onpropertychange', onPropertyChange);
-      el.attachEvent('onresize', onResize);
-
-      var attrs = el.attributes;
-      if (attrs.width && attrs.width.specified) {
-        // TODO: use runtimeStyle and coordsize
-        // el.getContext().setWidth_(attrs.width.nodeValue);
-        el.style.width = attrs.width.nodeValue + "px";
-      } else {
-        el.width = el.clientWidth;
-      }
-      if (attrs.height && attrs.height.specified) {
-        // TODO: use runtimeStyle and coordsize
-        // el.getContext().setHeight_(attrs.height.nodeValue);
-        el.style.height = attrs.height.nodeValue + "px";
-      } else {
-        el.height = el.clientHeight;
-      }
-      //el.getContext().setCoordsize_()
-      return el;
-    }
-  };
-
-  function onPropertyChange(e) {
-    var el = e.srcElement;
-
-    switch (e.propertyName) {
-      case 'width':
-        el.style.width = el.attributes.width.nodeValue + "px";
-        el.getContext().clearRect();
-        break;
-      case 'height':
-        el.style.height = el.attributes.height.nodeValue + "px";
-        el.getContext().clearRect();
-        break;
-    }
+    case KEY.LEFT:
+    case KEY.A: input.left = true; break;
+ 
+    case KEY.DOWN:
+    case KEY.S: input.down = true; break;
+ 
+    case KEY.Q: input.quit = true; break;
   }
+}
 
-  function onResize(e) {
-    var el = e.srcElement;
-    if (el.firstChild) {
-      el.firstChild.style.width =  el.clientWidth + 'px';
-      el.firstChild.style.height = el.clientHeight + 'px';
-    }
+function release(evt) {
+  var code = evt.keyCode;
+  switch(code) {
+    case KEY.RIGHT:
+    case KEY.D: input.right = false; break;
+
+    case KEY.UP:
+    case KEY.W: input.up = false; break;
+
+    case KEY.LEFT:
+    case KEY.A: input.left = false; break;
+
+    case KEY.DOWN:
+    case KEY.S: input.down = false; break;
+
+    case KEY.Q: break;
+
+    // default: trace('unrecognized key code: ' +code); break;
   }
+}
 
-  G_vmlCanvasManager_.init();
-
-  // precompute "00" to "FF"
-  var dec2hex = [];
-  for (var i = 0; i < 16; i++) {
-    for (var j = 0; j < 16; j++) {
-      dec2hex[i * 16 + j] = i.toString(16) + j.toString(16);
-    }
+function look(evt) {
+  if (evt.clientX && evt.clientY) {
+    input.look_x = evt.clientX;
+    input.look_y = evt.clientY;  
   }
-
-  function createMatrixIdentity() {
-    return [
-      [1, 0, 0],
-      [0, 1, 0],
-      [0, 0, 1]
-    ];
+  else {
+    input.look_x = false;
+    input.look_y = false;
   }
+  
+}
+function stopLook(evt) {
+  input.look_x = false;
+  input.look_y = false;
+}
 
-  function matrixMultiply(m1, m2) {
-    var result = createMatrixIdentity();
+// player
 
-    for (var x = 0; x < 3; x++) {
-      for (var y = 0; y < 3; y++) {
-        var sum = 0;
-
-        for (var z = 0; z < 3; z++) {
-          sum += m1[x][z] * m2[z][y];
-        }
-
-        result[x][y] = sum;
-      }
-    }
-    return result;
-  }
-
-  function copyState(o1, o2) {
-    o2.fillStyle     = o1.fillStyle;
-    o2.lineCap       = o1.lineCap;
-    o2.lineJoin      = o1.lineJoin;
-    o2.lineWidth     = o1.lineWidth;
-    o2.miterLimit    = o1.miterLimit;
-    o2.shadowBlur    = o1.shadowBlur;
-    o2.shadowColor   = o1.shadowColor;
-    o2.shadowOffsetX = o1.shadowOffsetX;
-    o2.shadowOffsetY = o1.shadowOffsetY;
-    o2.strokeStyle   = o1.strokeStyle;
-    o2.arcScaleX_    = o1.arcScaleX_;
-    o2.arcScaleY_    = o1.arcScaleY_;
-  }
-
-  function processStyle(styleString) {
-    var str, alpha = 1;
-
-    styleString = String(styleString);
-    if (styleString.substring(0, 3) == "rgb") {
-      var start = styleString.indexOf("(", 3);
-      var end = styleString.indexOf(")", start + 1);
-      var guts = styleString.substring(start + 1, end).split(",");
-
-      str = "#";
-      for (var i = 0; i < 3; i++) {
-        str += dec2hex[Number(guts[i])];
-      }
-
-      if ((guts.length == 4) && (styleString.substr(3, 1) == "a")) {
-        alpha = guts[3];
-      }
-    } else {
-      str = styleString;
-    }
-
-    return [str, alpha];
-  }
-
-  function processLineCap(lineCap) {
-    switch (lineCap) {
-      case "butt":
-        return "flat";
-      case "round":
-        return "round";
-      case "square":
-      default:
-        return "square";
-    }
-  }
-
-  /**
-   * This class implements CanvasRenderingContext2D interface as described by
-   * the WHATWG.
-   * @param {HTMLElement} surfaceElement The element that the 2D context should
-   * be associated with
-   */
-   function CanvasRenderingContext2D_(surfaceElement) {
-    this.m_ = createMatrixIdentity();
-
-    this.mStack_ = [];
-    this.aStack_ = [];
-    this.currentPath_ = [];
-
-    // Canvas context properties
-    this.strokeStyle = "#000";
-    this.fillStyle = "#000";
-
-    this.lineWidth = 1;
-    this.lineJoin = "miter";
-    this.lineCap = "butt";
-    this.miterLimit = Z * 1;
-    this.globalAlpha = 1;
-    this.canvas = surfaceElement;
-
-    var el = surfaceElement.ownerDocument.createElement('div');
-    el.style.width =  surfaceElement.clientWidth + 'px';
-    el.style.height = surfaceElement.clientHeight + 'px';
-    el.style.overflow = 'hidden';
-    el.style.position = 'absolute';
-    surfaceElement.appendChild(el);
-
-    this.element_ = el;
-    this.arcScaleX_ = 1;
-    this.arcScaleY_ = 1;
+function Player(s) {
+  this.health = 100;
+  this.speed = {
+    forward : s,
+    backward: .5 * s,
+    turn : 4 * s
   };
+}
 
-  var contextPrototype = CanvasRenderingContext2D_.prototype;
-  contextPrototype.clearRect = function() {
-    this.element_.innerHTML = "";
-    this.currentPath_ = [];
-  };
+// level
 
-  contextPrototype.beginPath = function() {
-    // TODO: Branch current matrix so that save/restore has no effect
-    //       as per safari docs.
+function Level() {
+  this.CELLTYPE_OPEN = -1;
+  this.CELL_SIZE = 64; // using multiple of 2 for optimization
+  this.CELL_SIZE_SHIFT = 6; // x >> 6 = Math.floor(x/64)
+  this.CELL_HALF = this.CELL_SIZE >> 1; // must be integer
 
-    this.currentPath_ = [];
-  };
+  this.cellCount = { _x:0, _y:0 };
+  this.dimension = { _x:0, _y:0 };
+  this.spawnPoint = { _x:0, _y:0 };
+  this.colors = { ground:'#000000', sky:'#FFFFFF', wallsNear:0, wallsFar:0 };
 
-  contextPrototype.moveTo = function(aX, aY) {
-    this.currentPath_.push({type: "moveTo", x: aX, y: aY});
-    this.currentX_ = aX;
-    this.currentY_ = aY;
-  };
+  this.map;
+  this.viewExtent;
+  this.walltypes;
 
-  contextPrototype.lineTo = function(aX, aY) {
-    this.currentPath_.push({type: "lineTo", x: aX, y: aY});
-    this.currentX_ = aX;
-    this.currentY_ = aY;
-  };
+   this.parseMap = function(mapString, cols, rows) {
+      this.cellCount._x = cols;
+      this.cellCount._y = rows;
+      this.dimension._x = this.cellCount._x * this.CELL_SIZE;
+      this.dimension._y = this.cellCount._y * this.CELL_SIZE;
 
-  contextPrototype.bezierCurveTo = function(aCP1x, aCP1y,
-                                            aCP2x, aCP2y,
-                                            aX, aY) {
-    this.currentPath_.push({type: "bezierCurveTo",
-                           cp1x: aCP1x,
-                           cp1y: aCP1y,
-                           cp2x: aCP2x,
-                           cp2y: aCP2y,
-                           x: aX,
-                           y: aY});
-    this.currentX_ = aX;
-    this.currentY_ = aY;
-  };
+      var parsedOk = false;
 
-  contextPrototype.quadraticCurveTo = function(aCPx, aCPy, aX, aY) {
-    // the following is lifted almost directly from
-    // http://developer.mozilla.org/en/docs/Canvas_tutorial:Drawing_shapes
-    var cp1x = this.currentX_ + 2.0 / 3.0 * (aCPx - this.currentX_);
-    var cp1y = this.currentY_ + 2.0 / 3.0 * (aCPy - this.currentY_);
-    var cp2x = cp1x + (aX - this.currentX_) / 3.0;
-    var cp2y = cp1y + (aY - this.currentY_) / 3.0;
-    this.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, aX, aY);
-  };
-
-  contextPrototype.arc = function(aX, aY, aRadius,
-                                  aStartAngle, aEndAngle, aClockwise) {
-    aRadius *= Z;
-    var arcType = aClockwise ? "at" : "wa";
-
-    var xStart = aX + (mc(aStartAngle) * aRadius) - Z2;
-    var yStart = aY + (ms(aStartAngle) * aRadius) - Z2;
-
-    var xEnd = aX + (mc(aEndAngle) * aRadius) - Z2;
-    var yEnd = aY + (ms(aEndAngle) * aRadius) - Z2;
-
-    // IE won't render arches drawn counter clockwise if xStart == xEnd.
-    if (xStart == xEnd && !aClockwise) {
-      xStart += 0.125; // Offset xStart by 1/80 of a pixel. Use something
-                       // that can be represented in binary
-    }
-
-    this.currentPath_.push({type: arcType,
-                           x: aX,
-                           y: aY,
-                           radius: aRadius,
-                           xStart: xStart,
-                           yStart: yStart,
-                           xEnd: xEnd,
-                           yEnd: yEnd});
-
-  };
-
-  contextPrototype.rect = function(aX, aY, aWidth, aHeight) {
-    this.moveTo(aX, aY);
-    this.lineTo(aX + aWidth, aY);
-    this.lineTo(aX + aWidth, aY + aHeight);
-    this.lineTo(aX, aY + aHeight);
-    this.closePath();
-  };
-
-  contextPrototype.strokeRect = function(aX, aY, aWidth, aHeight) {
-    // Will destroy any existing path (same as FF behaviour)
-    this.beginPath();
-    this.moveTo(aX, aY);
-    this.lineTo(aX + aWidth, aY);
-    this.lineTo(aX + aWidth, aY + aHeight);
-    this.lineTo(aX, aY + aHeight);
-    this.closePath();
-    this.stroke();
-  };
-
-  contextPrototype.fillRect = function(aX, aY, aWidth, aHeight) {
-    // Will destroy any existing path (same as FF behaviour)
-    this.beginPath();
-    this.moveTo(aX, aY);
-    this.lineTo(aX + aWidth, aY);
-    this.lineTo(aX + aWidth, aY + aHeight);
-    this.lineTo(aX, aY + aHeight);
-    this.closePath();
-    this.fill();
-  };
-
-  contextPrototype.createLinearGradient = function(aX0, aY0, aX1, aY1) {
-    var gradient = new CanvasGradient_("gradient");
-    return gradient;
-  };
-
-  contextPrototype.createRadialGradient = function(aX0, aY0,
-                                                   aR0, aX1,
-                                                   aY1, aR1) {
-    var gradient = new CanvasGradient_("gradientradial");
-    gradient.radius1_ = aR0;
-    gradient.radius2_ = aR1;
-    gradient.focus_.x = aX0;
-    gradient.focus_.y = aY0;
-    return gradient;
-  };
-
-  contextPrototype.drawImage = function (image, var_args) {
-    var dx, dy, dw, dh, sx, sy, sw, sh;
-
-    // to find the original width we overide the width and height
-    var oldRuntimeWidth = image.runtimeStyle.width;
-    var oldRuntimeHeight = image.runtimeStyle.height;
-    image.runtimeStyle.width = 'auto';
-    image.runtimeStyle.height = 'auto';
-
-    // get the original size
-    var w = image.width;
-    var h = image.height;
-
-    // and remove overides
-    image.runtimeStyle.width = oldRuntimeWidth;
-    image.runtimeStyle.height = oldRuntimeHeight;
-
-    if (arguments.length == 3) {
-      dx = arguments[1];
-      dy = arguments[2];
-      sx = sy = 0;
-      sw = dw = w;
-      sh = dh = h;
-    } else if (arguments.length == 5) {
-      dx = arguments[1];
-      dy = arguments[2];
-      dw = arguments[3];
-      dh = arguments[4];
-      sx = sy = 0;
-      sw = w;
-      sh = h;
-    } else if (arguments.length == 9) {
-      sx = arguments[1];
-      sy = arguments[2];
-      sw = arguments[3];
-      sh = arguments[4];
-      dx = arguments[5];
-      dy = arguments[6];
-      dw = arguments[7];
-      dh = arguments[8];
-    } else {
-      throw "Invalid number of arguments";
-    }
-
-    var d = this.getCoords_(dx, dy);
-
-    var w2 = sw / 2;
-    var h2 = sh / 2;
-
-    var vmlStr = [];
-
-    var W = 10;
-    var H = 10;
-
-    // For some reason that I've now forgotten, using divs didn't work
-    vmlStr.push(' <g_vml_:group',
-                ' coordsize="', Z * W, ',', Z * H, '"',
-                ' coordorigin="0,0"' ,
-                ' style="width:', W, ';height:', H, ';position:absolute;');
-
-    // If filters are necessary (rotation exists), create them
-    // filters are bog-slow, so only create them if abbsolutely necessary
-    // The following check doesn't account for skews (which don't exist
-    // in the canvas spec (yet) anyway.
-
-    if (this.m_[0][0] != 1 || this.m_[0][1]) {
-      var filter = [];
-
-      // Note the 12/21 reversal
-      filter.push("M11='", this.m_[0][0], "',",
-                  "M12='", this.m_[1][0], "',",
-                  "M21='", this.m_[0][1], "',",
-                  "M22='", this.m_[1][1], "',",
-                  "Dx='", mr(d.x / Z), "',",
-                  "Dy='", mr(d.y / Z), "'");
-
-      // Bounding box calculation (need to minimize displayed area so that
-      // filters don't waste time on unused pixels.
-      var max = d;
-      var c2 = this.getCoords_(dx + dw, dy);
-      var c3 = this.getCoords_(dx, dy + dh);
-      var c4 = this.getCoords_(dx + dw, dy + dh);
-
-      max.x = Math.max(max.x, c2.x, c3.x, c4.x);
-      max.y = Math.max(max.y, c2.y, c3.y, c4.y);
-
-      vmlStr.push("padding:0 ", mr(max.x / Z), "px ", mr(max.y / Z),
-                  "px 0;filter:progid:DXImageTransform.Microsoft.Matrix(",
-                  filter.join(""), ", sizingmethod='clip');")
-    } else {
-      vmlStr.push("top:", mr(d.y / Z), "px;left:", mr(d.x / Z), "px;")
-    }
-
-    vmlStr.push(' ">' ,
-                '<g_vml_:image src="', image.src, '"',
-                ' style="width:', Z * dw, ';',
-                ' height:', Z * dh, ';"',
-                ' cropleft="', sx / w, '"',
-                ' croptop="', sy / h, '"',
-                ' cropright="', (w - sx - sw) / w, '"',
-                ' cropbottom="', (h - sy - sh) / h, '"',
-                ' />',
-                '</g_vml_:group>');
-
-    this.element_.insertAdjacentHTML("BeforeEnd",
-                                    vmlStr.join(""));
-  };
-
-  contextPrototype.stroke = function(aFill) {
-    var lineStr = [];
-    var lineOpen = false;
-    var a = processStyle(aFill ? this.fillStyle : this.strokeStyle);
-    var color = a[0];
-    var opacity = a[1] * this.globalAlpha;
-
-    var W = 10;
-    var H = 10;
-
-    lineStr.push('<g_vml_:shape',
-                 ' fillcolor="', color, '"',
-                 ' filled="', Boolean(aFill), '"',
-                 ' style="position:absolute;width:', W, ';height:', H, ';"',
-                 ' coordorigin="0 0" coordsize="', Z * W, ' ', Z * H, '"',
-                 ' stroked="', !aFill, '"',
-                 ' strokeweight="', this.lineWidth, '"',
-                 ' strokecolor="', color, '"',
-                 ' path="');
-
-    var newSeq = false;
-    var min = {x: null, y: null};
-    var max = {x: null, y: null};
-
-    for (var i = 0; i < this.currentPath_.length; i++) {
-      var p = this.currentPath_[i];
-
-      if (p.type == "moveTo") {
-        lineStr.push(" m ");
-        var c = this.getCoords_(p.x, p.y);
-        lineStr.push(mr(c.x), ",", mr(c.y));
-      } else if (p.type == "lineTo") {
-        lineStr.push(" l ");
-        var c = this.getCoords_(p.x, p.y);
-        lineStr.push(mr(c.x), ",", mr(c.y));
-      } else if (p.type == "close") {
-        lineStr.push(" x ");
-      } else if (p.type == "bezierCurveTo") {
-        lineStr.push(" c ");
-        var c = this.getCoords_(p.x, p.y);
-        var c1 = this.getCoords_(p.cp1x, p.cp1y);
-        var c2 = this.getCoords_(p.cp2x, p.cp2y);
-        lineStr.push(mr(c1.x), ",", mr(c1.y), ",",
-                     mr(c2.x), ",", mr(c2.y), ",",
-                     mr(c.x), ",", mr(c.y));
-      } else if (p.type == "at" || p.type == "wa") {
-        lineStr.push(" ", p.type, " ");
-        var c  = this.getCoords_(p.x, p.y);
-        var cStart = this.getCoords_(p.xStart, p.yStart);
-        var cEnd = this.getCoords_(p.xEnd, p.yEnd);
-
-        lineStr.push(mr(c.x - this.arcScaleX_ * p.radius), ",",
-                     mr(c.y - this.arcScaleY_ * p.radius), " ",
-                     mr(c.x + this.arcScaleX_ * p.radius), ",",
-                     mr(c.y + this.arcScaleY_ * p.radius), " ",
-                     mr(cStart.x), ",", mr(cStart.y), " ",
-                     mr(cEnd.x), ",", mr(cEnd.y));
+      if (mapString.length != this.cellCount._x * this.cellCount._y) {
+        // trace("map size not equal to level dimensions");
       }
 
+      else {
+        this.walltypes = "@#%&";
+        this.colors.ground = '#444455';
+        this.colors.sky = '#66AAFF';
+        this.colors.wallsNear = new Array(0xDD1111, 0x11DD11, 0x1111DD, 0x6611CC);
+        this.colors.wallsFar  = new Array(0x110000, 0x001100, 0x000011, 0x110022);
+        this.viewExtent = this.CELL_SIZE * 7;
+        var spawnChar = "P";
 
-      // TODO: Following is broken for curves due to
-      //       move to proper paths.
-
-      // Figure out dimensions so we can do gradient fills
-      // properly
-      if(c) {
-        if (min.x == null || c.x < min.x) {
-          min.x = c.x;
+        this.map = new Array();
+        for (var row = 0; row < this.cellCount._y; row++) {
+           var r = new Array();
+           for (var col = 0; col < this.cellCount._x; col++) {
+              var type = this.CELLTYPE_OPEN;
+              var c = mapString.charAt(row * this.cellCount._x + col);
+              if (c == spawnChar) {
+                type = this.CELLTYPE_OPEN;
+                this.spawnPoint._x = col * this.CELL_SIZE + this.CELL_HALF;
+                this.spawnPoint._y = row * this.CELL_SIZE + this.CELL_HALF;
+              }
+              else {
+                var i = this.walltypes.indexOf(c);
+                if (i > -1) { type = i; }
+              }
+              r.push(type);
+           }
+           this.map.push(r);
         }
-        if (max.x == null || c.x > max.x) {
-          max.x = c.x;
-        }
-        if (min.y == null || c.y < min.y) {
-          min.y = c.y;
-        }
-        if (max.y == null || c.y > max.y) {
-          max.y = c.y;
-        }
-      }
-    }
-    lineStr.push(' ">');
-
-    if (typeof this.fillStyle == "object") {
-      var focus = {x: "50%", y: "50%"};
-      var width = (max.x - min.x);
-      var height = (max.y - min.y);
-      var dimension = (width > height) ? width : height;
-
-      focus.x = mr((this.fillStyle.focus_.x / width) * 100 + 50) + "%";
-      focus.y = mr((this.fillStyle.focus_.y / height) * 100 + 50) + "%";
-
-      var colors = [];
-
-      // inside radius (%)
-      if (this.fillStyle.type_ == "gradientradial") {
-        var inside = (this.fillStyle.radius1_ / dimension * 100);
-
-        // percentage that outside radius exceeds inside radius
-        var expansion = (this.fillStyle.radius2_ / dimension * 100) - inside;
-      } else {
-        var inside = 0;
-        var expansion = 100;
+        parsedOk = true;
       }
 
-      var insidecolor = {offset: null, color: null};
-      var outsidecolor = {offset: null, color: null};
+      return parsedOk;
+   }
 
-      // We need to sort 'colors' by percentage, from 0 > 100 otherwise ie
-      // won't interpret it correctly
-      this.fillStyle.colors_.sort(function (cs1, cs2) {
-        return cs1.offset - cs2.offset;
-      });
+ }
 
-      for (var i = 0; i < this.fillStyle.colors_.length; i++) {
-        var fs = this.fillStyle.colors_[i];
+ // raycaster
 
-        colors.push( (fs.offset * expansion) + inside, "% ", fs.color, ",");
 
-        if (fs.offset > insidecolor.offset || insidecolor.offset == null) {
-          insidecolor.offset = fs.offset;
-          insidecolor.color = fs.color;
+function RayCaster(canvas, w, h, z, level, player, inputBuffer) {
+
+    this.QUAD_I = Math.PI * .5;
+    this.QUAD_II = Math.PI;
+    this.QUAD_III = Math.PI * 1.5;
+    this.TO_RADS = Math.PI / 180;
+    this.TO_DEGS = 180 / Math.PI;
+    this.INFINITY = 10000;
+    this.RES = { w:w, h:h, hh:h * .5 }; // .5 controls height angle
+    this.FOV = 60 * this.TO_RADS;
+    this.SLIVER_ARC = this.FOV / this.RES.w;
+    this.TABLE_ENTRIES = Math.ceil(Math.PI * 2 / this.SLIVER_ARC);
+
+    this.TABLE_INV_SIN;
+    this.TABLE_INV_COS;
+    this.TABLE_TAN;
+    this.TABLE_INV_TAN;
+    this.QUAD_BOUNDARIES;
+    this.TABLE_VIEW_CORRECTION;
+    this.TABLE_REFLECTANCE_LATITUDE;
+    this.TABLE_REFLECTANCE_LONGITUDE;
+    this.TABLE_HEX = [
+    '00','01','02','03','04','05','06','07','08','09','0a','0b','0c','0d','0e','0f',
+    '10','11','12','13','14','15','16','17','18','19','1a','1b','1c','1d','1e','1f',
+    '20','21','22','23','24','25','26','27','28','29','2a','2b','2c','2d','2e','2f',
+    '30','31','32','33','34','35','36','37','38','39','3a','3b','3c','3d','3e','3f',
+    '40','41','42','43','44','45','46','47','48','49','4a','4b','4c','4d','4e','4f',
+    '50','51','52','53','54','55','56','57','58','59','5a','5b','5c','5d','5e','5f',
+    '60','61','62','63','64','65','66','67','68','69','6a','6b','6c','6d','6e','6f',
+    '70','71','72','73','74','75','76','77','78','79','7a','7b','7c','7d','7e','7f',
+    '80','81','82','83','84','85','86','87','88','89','8a','8b','8c','8d','8e','8f',
+    '90','91','92','93','94','95','96','97','98','99','9a','9b','9c','9d','9e','9f',
+    'a0','a1','a2','a3','a4','a5','a6','a7','a8','a9','aa','ab','ac','ad','ae','af',
+    'b0','b1','b2','b3','b4','b5','b6','b7','b8','b9','ba','bb','bc','bd','be','bf',
+    'c0','c1','c2','c3','c4','c5','c6','c7','c8','c9','ca','cb','cc','cd','ce','cf',
+    'd0','d1','d2','d3','d4','d5','d6','d7','d8','d9','da','db','dc','dd','de','df',
+    'e0','e1','e2','e3','e4','e5','e6','e7','e8','e9','ea','eb','ec','ed','ee','ef',
+    'f0','f1','f2','f3','f4','f5','f6','f7','f8','f9','fa','fb','fc','fd','fe','ff'];
+    this.PALETTE;
+    this.CENTERLINE_SHIFT = -50; //adjust player height
+
+    this.camera = { position: { _x:-1, _y:-1}, direction: 0 }
+   this.idle = false;
+   this.sliverWidth = z * .25; // this is the high definition
+    this.canvas = canvas;
+   this.canvas.lineWidth = this.sliverWidth;
+    this.level = level; //new Level();
+    this.player = player; //new Player(8);
+    this.inputHappened = inputBuffer;//new Array(false, false, false, false);
+    
+    this.update = function() {
+    if (!this.idle) {
+      this.blank(this.RES.w, this.RES.h, this.RES.hh, this.level.colors.sky, this.level.colors.ground);
+      this.cast();
+    }
+    this.processInput();
+    }
+    
+    this.loadMap = function(m, x, y) {
+        var parseOk = this.level.parseMap(m, x, y);
+        if (parseOk) {
+            this.buildPalette();
+            this.camera.position._x = this.level.spawnPoint._x;
+            this.camera.position._y = this.level.spawnPoint._y;
+            this.camera.direction = 0;
+            trace("player spawned at [" +this.camera.position._x +" " +this.camera.position._y +"]");
         }
+        return parseOk;
+    }
+    
+    this.cast = function() {
+        var hit_latitude = { _x:0, _y:0, type:this.level.CELLTYPE_OPEN };
+        var hit_longitude = { _x:0, _y:0, type:this.level.CELLTYPE_OPEN };
+        var distance = { _x:0, _y:0 };
+        var step = { _x:0, _y:0 };
+        var mapScale = this.RES.h / this.level.dimension._y;
 
-        if (fs.offset < outsidecolor.offset || outsidecolor.offset == null) {
-          outsidecolor.offset = fs.offset;
-          outsidecolor.color = fs.color;
+
+        var wallHeight = this.RES.h;
+        
+        var wallHalfHeight;
+        var wallScale;
+        var wallTop;
+        var wallCenter;
+        var wallBottom;
+        
+        var brightness;
+        var rlu;
+        var C;
+        var sliverColor;
+
+        // cast a ray for every sliver of our Field Of View (from -this.FOV/2 to this.FOV/2),
+        // looking for both latitudinal (E-W) and longitudinal (N-S) intersections.
+        // the closest intersection will determine how to render the sliver.
+        var rayDirection = this.camera.direction - Math.round(this.RES.w * .5) + 1;
+        if (rayDirection < 0) { rayDirection += this.TABLE_ENTRIES; }
+        for (var currentSliver = 0; currentSliver < this.RES.w; currentSliver += this.sliverWidth) {
+            rayDirection += this.sliverWidth;
+            if (rayDirection >= this.TABLE_ENTRIES) { rayDirection = 0; }
+            
+            // look for intersections with latitudinal boundaries (running east-west)
+            if (rayDirection >= this.QUAD_BOUNDARIES[0] && rayDirection < this.QUAD_BOUNDARIES[2]) {
+                this.cast_north(hit_latitude, distance, step, rayDirection);
+            }
+            else {
+                this.cast_south(hit_latitude, distance, step, rayDirection);
+            }
+            
+            // look for intersections with longitudinal boundaries (running north-south)
+            if (rayDirection >= this.QUAD_BOUNDARIES[1] && rayDirection < this.QUAD_BOUNDARIES[3]) {
+                this.cast_west(hit_longitude, distance, step, rayDirection);
+            }
+            else {
+                this.cast_east(hit_longitude, distance, step, rayDirection);
+            }
+        
+            // compare distances and draw nearest intersection
+            if (distance._x < distance._y) {
+                // draw a latitudinal wall sliver (east-west wall)
+                distance._x *= this.TABLE_VIEW_CORRECTION[currentSliver];
+                wallScale = this.level.CELL_SIZE / distance._x;
+                rlu = rayDirection - this.camera.direction;
+                if (rlu < 0) { rlu += this.TABLE_ENTRIES; }
+                else if (rlu >= this.TABLE_ENTRIES) { rlu -= this.TABLE_ENTRIES; }
+                brightness = 1 - Math.min(1, distance._x / this.level.viewExtent);
+                brightness *= this.TABLE_REFLECTANCE_LATITUDE[rlu];
+                C = this.PALETTE[hit_latitude.type];
+                sliverColor = '#' +
+                         this.TABLE_HEX[ Math.round(C.r.delta * brightness + C.r.far) ] +
+                              this.TABLE_HEX[ Math.round(C.g.delta * brightness + C.g.far) ] +
+                              this.TABLE_HEX[ Math.round(C.b.delta * brightness + C.b.far) ];
+            }
+            else {
+                // draw a longitudinal wall sliver (north-south wall)
+                distance._y *= this.TABLE_VIEW_CORRECTION[currentSliver];
+                wallScale = this.level.CELL_SIZE / distance._y;
+                rlu = rayDirection - this.camera.direction;
+                if (rlu < 0) { rlu += this.TABLE_ENTRIES; }
+                else if (rlu >= this.TABLE_ENTRIES) { rlu -= this.TABLE_ENTRIES; }
+                brightness = 1 - Math.min(1, distance._y / this.level.viewExtent);
+                brightness *= this.TABLE_REFLECTANCE_LONGITUDE[rlu];
+                C = this.PALETTE[hit_longitude.type];
+                sliverColor = '#' +
+                         this.TABLE_HEX[ Math.round(C.r.delta * brightness + C.r.far) ] +
+                              this.TABLE_HEX[ Math.round(C.g.delta * brightness + C.g.far) ] +
+                              this.TABLE_HEX[ Math.round(C.b.delta * brightness + C.b.far) ];
+            }
+            wallCenter = Math.round(this.RES.hh + this.CENTERLINE_SHIFT*wallScale);
+            wallHalfHeight = (wallHeight * wallScale) >> 1;
+            wallTop = Math.max(0, wallCenter - wallHalfHeight);
+            wallBottom = Math.min(this.RES.h, wallCenter + wallHalfHeight);
+            this.drawSliver(currentSliver, wallTop, wallBottom, sliverColor);
         }
-      }
-      colors.pop();
-
-      lineStr.push('<g_vml_:fill',
-                   ' color="', outsidecolor.color, '"',
-                   ' color2="', insidecolor.color, '"',
-                   ' type="', this.fillStyle.type_, '"',
-                   ' focusposition="', focus.x, ', ', focus.y, '"',
-                   ' colors="', colors.join(""), '"',
-                   ' opacity="', opacity, '" />');
-    } else if (aFill) {
-      lineStr.push('<g_vml_:fill color="', color, '" opacity="', opacity, '" />');
-    } else {
-      lineStr.push(
-        '<g_vml_:stroke',
-        ' opacity="', opacity,'"',
-        ' joinstyle="', this.lineJoin, '"',
-        ' miterlimit="', this.miterLimit, '"',
-        ' endcap="', processLineCap(this.lineCap) ,'"',
-        ' weight="', this.lineWidth, 'px"',
-        ' color="', color,'" />'
-      );
+    }
+    
+    this.cast_north = function(hit, distance, step, ray) {
+        // casting northward (0 - 180 degrees), Y is increasing
+        var cellBoundY = this.camera.position._y >> this.level.CELL_SIZE_SHIFT;
+        hit._y = (cellBoundY+1) << this.level.CELL_SIZE_SHIFT;
+        hit._x = this.camera.position._x + ((hit._y - this.camera.position._y) * this.TABLE_INV_TAN[ray]);
+        step._x = this.level.CELL_SIZE * this.TABLE_INV_TAN[ray];
+        step._y = this.level.CELL_SIZE;
+        
+        var casting = true;
+        while (casting) {
+            // is current hit point out of bounds?
+            if ( (hit._x < 0) || (hit._x >= this.level.dimension._x) ) {
+                distance._x = this.INFINITY;
+                casting = false;
+            }
+            else {
+                // is there a wall at the cell boundary north of the hitpoint?
+                // walltype = this.level.map[row][col];
+                hit.type = this.level.map[((hit._y + this.level.CELL_HALF) >> this.level.CELL_SIZE_SHIFT)][(hit._x >> this.level.CELL_SIZE_SHIFT)];
+                if (hit.type != this.level.CELLTYPE_OPEN) {
+                    distance._x = (hit._y - this.camera.position._y) * this.TABLE_INV_SIN[ray];
+                    casting = false;
+                }
+                // if still in bounds but south of an empty cell, then cast further north
+                else {
+                    hit._x += step._x;
+                    hit._y += step._y;
+                }
+            }
+        }
+    }
+    
+    this.cast_south = function(hit, distance, step, ray) {
+        // casting southward (180 - 360 degrees), Y is decreasing
+        var cellBoundY = this.camera.position._y >> this.level.CELL_SIZE_SHIFT;
+        hit._y = cellBoundY << this.level.CELL_SIZE_SHIFT;
+        hit._x = this.camera.position._x + ((hit._y - this.camera.position._y) * this.TABLE_INV_TAN[ray]);
+        step._x = -this.level.CELL_SIZE * this.TABLE_INV_TAN[ray];
+        step._y = -this.level.CELL_SIZE;
+        
+        var casting = true;
+        while (casting) {
+            // is current hit point out of bounds?
+            if ( (hit._x < 0) || (hit._x >= this.level.dimension._x) ) {
+                distance._x = this.INFINITY;
+                casting = false;
+            }
+            else {
+                // is there a wall at the cell boundary south of the hitpoint?
+                // walltype = this.level.map[row][col];
+                hit.type = this.level.map[((hit._y - this.level.CELL_HALF) >> this.level.CELL_SIZE_SHIFT)][(hit._x >> this.level.CELL_SIZE_SHIFT)];
+                if (hit.type != this.level.CELLTYPE_OPEN) {
+                    distance._x = (hit._y - this.camera.position._y) * this.TABLE_INV_SIN[ray];
+                    casting = false;
+                }
+                // if still in bounds but north of an empty cell, then cast further south
+                else {
+                    hit._x += step._x;
+                    hit._y += step._y;
+                }
+            }
+        }
+    }
+    
+    this.cast_west = function(hit, distance, step, ray) {
+        // casting westward (90 - 270 degrees), X is decreasing
+        var cellBoundX = this.camera.position._x >> this.level.CELL_SIZE_SHIFT;
+        hit._x = cellBoundX << this.level.CELL_SIZE_SHIFT;
+        hit._y = this.camera.position._y + ((hit._x - this.camera.position._x) * this.TABLE_TAN[ray]);
+        step._x = -this.level.CELL_SIZE;
+        step._y = -this.level.CELL_SIZE * this.TABLE_TAN[ray];
+        
+        var casting = true;
+        while (casting) {
+            // is current hit point out of bounds?
+            if ( (hit._y < 0) || (hit._y >= this.level.dimension._y) ) {
+                distance._y = this.INFINITY;
+                casting = false;
+            }
+            else {
+                // is there a wall at the cell boundary west of the hitpoint?
+                // walltype = this.level.map[row][col];
+                hit.type = this.level.map[(hit._y >> this.level.CELL_SIZE_SHIFT)][((hit._x - this.level.CELL_HALF) >> this.level.CELL_SIZE_SHIFT)];
+                if (hit.type != this.level.CELLTYPE_OPEN) {
+                    distance._y = (hit._x - this.camera.position._x) * this.TABLE_INV_COS[ray];
+                    casting = false;
+                }
+                // if still in bounds but east of an empty cell, then cast further west
+                else {
+                    hit._x += step._x;
+                    hit._y += step._y;
+                }
+            }
+        }
+    }
+    
+    this.cast_east = function(hit, distance, step, ray) {
+        // casting eastward (0-90, 270-360 degrees), X is increasing
+        var cellBoundX = this.camera.position._x >> this.level.CELL_SIZE_SHIFT;
+        hit._x = (cellBoundX+1) << this.level.CELL_SIZE_SHIFT;
+        hit._y = this.camera.position._y + ((hit._x - this.camera.position._x) * this.TABLE_TAN[ray]);
+        step._x = this.level.CELL_SIZE;
+        step._y = this.level.CELL_SIZE * this.TABLE_TAN[ray];
+        
+        var casting = true;
+        while (casting) {
+            // is current hit point out of bounds?
+            if ( (hit._y < 0) || (hit._y >= this.level.dimension._y) ) {
+                distance._y = this.INFINITY;
+                casting = false;
+            }
+            else {
+                // is there a wall at the cell boundary east of the hitpoint?
+                // walltype = this.level.map[row][col];
+                hit.type = this.level.map[hit._y >> this.level.CELL_SIZE_SHIFT][(hit._x + this.level.CELL_HALF) >> this.level.CELL_SIZE_SHIFT];
+                if (hit.type != this.level.CELLTYPE_OPEN) {
+                    distance._y = (hit._x - this.camera.position._x) * this.TABLE_INV_COS[ray];
+                    casting = false;
+                }
+                // if still in bounds but west of an empty cell, then cast further east
+                else {
+                    hit._x += step._x;
+                    hit._y += step._y;
+                }
+            }
+        }
+    }
+    
+    this.blank = function(w, h, hh, sky, ground) {
+        // clear drawings from previous update (pen resets to [0, 0]),
+      this.canvas.clearRect(0, 0, w, h);
+        // draw fresh background of sky and ground
+      this.canvas.fillStyle = sky;
+      this.canvas.fillRect(0, 0, w, hh);
+      this.canvas.fillStyle = ground;
+      this.canvas.fillRect(0, hh, w, h);
+    }
+    
+    this.drawSliver = function(x, t, b, c) {
+        // draw a vertical 1-pixel wide sliver of wall
+      var xc = x + this.sliverWidth * .5;
+      this.canvas.beginPath();
+      this.canvas.strokeStyle = c;
+      this.canvas.moveTo(xc, t);
+      this.canvas.lineTo(xc, b);
+      this.canvas.closePath();
+      this.canvas.stroke();
+    }
+    
+    this.processInput = function() {
+     this.idle = true;
+     
+        if (this.inputHappened.look_x < this.canvas.canvas.width/2 && this.inputHappened.look_x) {
+            // rotate this.camera counter-clockwise
+        this.idle = false;
+        trace('turning left');
+            this.camera.direction -= this.player.speed.turn;
+            if (this.camera.direction < 0) { this.camera.direction += this.TABLE_ENTRIES; }
+        }
+        if (this.inputHappened.look_x > this.canvas.canvas.width/2) {
+            // rotate this.camera clockwise
+        this.idle = false;
+        trace('turning right');
+            this.camera.direction += this.player.speed.turn;
+            if (this.camera.direction >= this.TABLE_ENTRIES) { this.camera.direction -= this.TABLE_ENTRIES; }
+        }
+        if (this.inputHappened.left) {
+            // rotate this.camera counter-clockwise
+        this.idle = false;
+        trace('moving left');
+            var newX = this.camera.position._x + this.player.speed.backward / this.TABLE_INV_SIN[this.camera.direction];
+            var newY = this.camera.position._y + this.player.speed.backward / -this.TABLE_INV_COS[this.camera.direction];
+            var row = newY >> this.level.CELL_SIZE_SHIFT;
+            var col = newX >> this.level.CELL_SIZE_SHIFT;
+            if (this.level.map[row][col] == this.level.CELLTYPE_OPEN) {
+                this.camera.position._x = newX;
+                this.camera.position._y = newY;
+            }
+        }
+        if (this.inputHappened.right) {
+            // rotate this.camera clockwise
+        this.idle = false;
+        trace('moving right');
+            var newX = this.camera.position._x + this.player.speed.backward / this.TABLE_INV_SIN[this.camera.direction];
+            var newY = this.camera.position._y + this.player.speed.backward / this.TABLE_INV_COS[this.camera.direction];
+            var row = newY >> this.level.CELL_SIZE_SHIFT;
+            var col = newX >> this.level.CELL_SIZE_SHIFT;
+            if (this.level.map[row][col] == this.level.CELLTYPE_OPEN) {
+                this.camera.position._x = newX;
+                this.camera.position._y = newY;
+            }
+        }
+        if (this.inputHappened.up) {
+            // ensure next step will take this.camera into empty cell
+        this.idle = false;
+        trace('moving forward');
+            var newX = this.camera.position._x + this.player.speed.forward / this.TABLE_INV_COS[this.camera.direction];
+            var newY = this.camera.position._y + this.player.speed.forward / this.TABLE_INV_SIN[this.camera.direction];
+            var row = newY >> this.level.CELL_SIZE_SHIFT;
+            var col = newX >> this.level.CELL_SIZE_SHIFT;
+            if (this.level.map[row][col] == this.level.CELLTYPE_OPEN) {
+                this.camera.position._x = newX;
+                this.camera.position._y = newY;
+            }
+        }
+        if (this.inputHappened.down) {
+            // ensure next step will take this.camera into empty cell
+        this.idle = false;
+        trace('moving backward');
+            var newX = this.camera.position._x - this.player.speed.backward / this.TABLE_INV_COS[this.camera.direction];
+            var newY = this.camera.position._y - this.player.speed.backward / this.TABLE_INV_SIN[this.camera.direction];
+            var row = newY >> this.level.CELL_SIZE_SHIFT;
+            var col = newX >> this.level.CELL_SIZE_SHIFT;
+            if (this.level.map[row][col] == this.level.CELLTYPE_OPEN) {
+                this.camera.position._x = newX;
+                this.camera.position._y = newY;
+            }
+        }
     }
 
-    lineStr.push("</g_vml_:shape>");
-
-    this.element_.insertAdjacentHTML("beforeEnd", lineStr.join(""));
-
-    this.currentPath_ = [];
-  };
-
-  contextPrototype.fill = function() {
-    this.stroke(true);
-  }
-
-  contextPrototype.closePath = function() {
-    this.currentPath_.push({type: "close"});
-  };
-
-  /**
-   * @private
-   */
-  contextPrototype.getCoords_ = function(aX, aY) {
-    return {
-      x: Z * (aX * this.m_[0][0] + aY * this.m_[1][0] + this.m_[2][0]) - Z2,
-      y: Z * (aX * this.m_[0][1] + aY * this.m_[1][1] + this.m_[2][1]) - Z2
+    this.buildPalette = function() {
+        // for each walltype color pair,
+        // extract the r,g,b components for shading use later
+        //
+        // 24-bit color:
+        //   rrrrrrrrggggggggbbbbbbbb
+        // 24      16       8       0
+        //
+        // extraction:
+        //   r = c >> 16              : shift out the green and blue
+        //   g = (c & 0x00FF00) >> 8  : mask out the red, shift out the blue
+        //   b = c & 0x0000FF         : mask out the red and green
+        // combination:
+        //   c = (r << 16) + (g << 8) + b  : shift the components into place and combine
+        
+        this.PALETTE = new Array();
+        // the palette will be used to interp from dark to light (far to near),
+        // so delta is set in this direction
+        for (var i = 0; i < this.level.walltypes.length; i++) {
+            // grab wallcolor near and wallcolor far
+            var wcn = this.level.colors.wallsNear[i];
+            var wcf = this.level.colors.wallsFar[i];
+            
+            // extract rgb components for near and far
+            var rn = (wcn & 0xff0000) >> 16;
+            var rf = (wcf & 0xff0000) >> 16;
+            //var rn = wcn >> 16;
+            //var rf = wcf >> 16;
+            var gn = (wcn & 0x00ff00) >> 8;
+            var gf = (wcf & 0x00ff00) >> 8;
+            var bn = wcn & 0x0000ff;
+            var bf = wcf & 0x0000ff;
+            
+            // assemble object and store in lookup table for use later
+            var C = {
+                r : { near:rn, far:rf, delta:rn-rf},
+                g : { near:gn, far:gf, delta:gn-gf},
+                b : { near:bn, far:bf, delta:bn-bf}
+            };
+            this.PALETTE[i] = C;
+        }
     }
-  };
-
-  contextPrototype.save = function() {
-    var o = {};
-    copyState(this, o);
-    this.aStack_.push(o);
-    this.mStack_.push(this.m_);
-    this.m_ = matrixMultiply(createMatrixIdentity(), this.m_);
-  };
-
-  contextPrototype.restore = function() {
-    copyState(this.aStack_.pop(), this);
-    this.m_ = this.mStack_.pop();
-  };
-
-  contextPrototype.translate = function(aX, aY) {
-    var m1 = [
-      [1,  0,  0],
-      [0,  1,  0],
-      [aX, aY, 1]
-    ];
-
-    this.m_ = matrixMultiply(m1, this.m_);
-  };
-
-  contextPrototype.rotate = function(aRot) {
-    var c = mc(aRot);
-    var s = ms(aRot);
-
-    var m1 = [
-      [c,  s, 0],
-      [-s, c, 0],
-      [0,  0, 1]
-    ];
-
-    this.m_ = matrixMultiply(m1, this.m_);
-  };
-
-  contextPrototype.scale = function(aX, aY) {
-    this.arcScaleX_ *= aX;
-    this.arcScaleY_ *= aY;
-    var m1 = [
-      [aX, 0,  0],
-      [0,  aY, 0],
-      [0,  0,  1]
-    ];
-
-    this.m_ = matrixMultiply(m1, this.m_);
-  };
-
-  /******** STUBS ********/
-  contextPrototype.clip = function() {
-    // TODO: Implement
-  };
-
-  contextPrototype.arcTo = function() {
-    // TODO: Implement
-  };
-
-  contextPrototype.createPattern = function() {
-    return new CanvasPattern_;
-  };
-
-  // Gradient / Pattern Stubs
-  function CanvasGradient_(aType) {
-    this.type_ = aType;
-    this.radius1_ = 0;
-    this.radius2_ = 0;
-    this.colors_ = [];
-    this.focus_ = {x: 0, y: 0};
-  }
-
-  CanvasGradient_.prototype.addColorStop = function(aOffset, aColor) {
-    aColor = processStyle(aColor);
-    this.colors_.push({offset: 1-aOffset, color: aColor});
-  };
-
-  function CanvasPattern_() {}
-
-  // set up externs
-  G_vmlCanvasManager = G_vmlCanvasManager_;
-  CanvasRenderingContext2D = CanvasRenderingContext2D_;
-  CanvasGradient = CanvasGradient_;
-  CanvasPattern = CanvasPattern_;
-
-})();
-
-} // if
+    
+    this.buildTables = function() {
+        // precompute values for expensive math ops
+        // we already know the field of view and horizontal screen res,
+        // and thus the degrees of view spanned by a single sliver of res,
+        // so we compute the trig values for enough slivers to cover 360 deg.
+        
+        // initialize the tables
+        this.TABLE_INV_SIN = new Array();
+        this.TABLE_INV_COS = new Array();
+        this.TABLE_TAN = new Array();
+        this.TABLE_INV_TAN = new Array();
+        this.QUAD_BOUNDARIES = new Array();
+        this.TABLE_REFLECTANCE_LATITUDE = new Array();
+        this.TABLE_REFLECTANCE_LONGITUDE = new Array();
+        
+        // define some unit circle constants
+        var PI_1over2 = Math.PI * 1 / 2; //  90 degrees
+        var PI_1over1 = Math.PI * 1;     // 180 degrees
+        var PI_3over2 = Math.PI * 3 / 2; // 270 degrees
+        var PI_2over1 = Math.PI * 2;     // 360 degrees
+        
+        // walk around the unit circle, jotting down trig values along the way.
+        // we need to look out for horizontal and vertical asymptotes, where tangent
+        // goes to infinity, and substitute a grossly underestimated value that
+        // won't break our calculations.
+        // also, when we cross an asymptote, we'll record the index i
+        // QUAD_
+        var quadrant = 0;
+        var angle = 0;
+        for (var i = 0; i < this.TABLE_ENTRIES; i++) {
+            var cosine = Math.cos(angle);
+            var sine = Math.sin(angle);
+            var absCosine = Math.abs(cosine);
+            var absSine = Math.abs(sine);
+            
+            if (absCosine == 0 || absSine == 1) {
+                // 90 or 270 degrees
+                this.TABLE_TAN[i] = -this.INFINITY;
+                this.TABLE_INV_TAN[i] = 0;
+                if (quadrant == 1) { this.TABLE_INV_COS[i] = -this.INFINITY; }
+                else               { this.TABLE_INV_COS[i] = this.INFINITY; }
+                this.TABLE_INV_SIN[i] = 1 / sine;
+                this.QUAD_BOUNDARIES[quadrant] = i;
+                quadrant++;
+            }
+            else if (absCosine == 1 || absSine == 0) {
+                // 0 or 180 degrees
+                this.TABLE_TAN[i] = 0;
+                this.TABLE_INV_TAN[i] = this.INFINITY;
+                if (quadrant == 0) { this.TABLE_INV_SIN[i] = this.INFINITY; }
+                else               { this.TABLE_INV_SIN[i] = -this.INFINITY; }
+                this.TABLE_INV_COS[i] = 1 / cosine;
+                this.QUAD_BOUNDARIES[quadrant] = i;
+                quadrant++;
+            }
+            else {
+                // no asymptotes to worry about
+                this.TABLE_TAN[i] = sine / cosine;
+                this.TABLE_INV_TAN[i] = cosine / sine;
+                this.TABLE_INV_COS[i] = 1 / cosine;
+                this.TABLE_INV_SIN[i] = 1 / sine;
+            }
+            
+            // for specular lighting,
+            // precalculate the cosine of the angle between
+            // every ray and the surface normal of:
+            //   1) a latitudinal (horizontal) surface
+            //   2) a longitudinal (vertical) surface
+            // the calculation requires that the angle be [0,PI/2]
+            var h = 0;
+            var v = 0;
+            switch (quadrant-1) {
+                case 0:
+                h = PI_1over2 - angle;
+                v = angle;
+                break;
+                
+                case 1:
+                h = angle - PI_1over2;
+                v = PI_1over1 - angle;
+                break;
+                
+                case 2:
+                h = PI_3over2 - angle;
+                v = angle - PI_1over1;
+                break;
+                
+                case 3:
+                h = angle - PI_3over2;
+                v = PI_2over1 - angle;
+                break;
+            }
+            this.TABLE_REFLECTANCE_LATITUDE[i]  = Math.sin( Math.min(PI_1over2, Math.max(0, h)) );
+            this.TABLE_REFLECTANCE_LONGITUDE[i] = Math.cos( Math.min(PI_1over2, Math.max(0, v)) );
+            
+            angle += this.SLIVER_ARC;
+        }
+        
+        // pre-compute view correction values for each sliver
+        this.TABLE_VIEW_CORRECTION = new Array();
+        var FOVangle = this.SLIVER_ARC * (-Math.round(this.FOV*.5));
+        for (var sliver = 0; sliver < this.RES.w; sliver++) {
+            this.TABLE_VIEW_CORRECTION[sliver] = Math.cos(FOVangle); // minimal fish-eye
+            //this.TABLE_VIEW_CORRECTION[sliver] = 1 / Math.cos(FOVangle); // extra fish-eye! cool.
+            FOVangle += this.SLIVER_ARC;
+        }
+    }
+    
+    this.buildTables();
+    
+}
