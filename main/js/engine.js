@@ -184,12 +184,25 @@ function Camera(canvas, resolution, focalLength) {
 }
 
 Camera.prototype.render = function(player, map) {
-    this.drawSky(player.direction, map.skybox, map.light);
+    // this.drawSky(player.direction, map.skybox, map.light);
+    // this.drawSky(player.direction, map.skybox, 0);
+    this.drawBackground(player.direction);
     this.drawColumns(player, map);
     // this.drawWeapon(player.weapon, player.paces);
 };
 
 var lookHeight = 1; // between 0 and 4
+
+Camera.prototype.drawBackground = function(direction) {
+    
+    this.ctx.save();
+    this.ctx.fillStyle="#000000";
+    this.ctx.fillRect(0,0,this.width,this.height);
+    this.ctx.fillStyle="#bbbbff";
+    this.ctx.fillRect(0,0,this.width,this.height/2+(lookHeight*40));
+    this.ctx.restore();
+
+}
 
 Camera.prototype.drawSky = function(direction, sky, ambient) {
     var width = sky.width * (this.height / sky.height) * 2;
