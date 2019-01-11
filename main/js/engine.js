@@ -12,39 +12,45 @@ function Controls() {
         'left': false,
         'right': false,
         'forward': false,
-        'backward': false
+        'backward': false,
+        'look':[0,0]
     };
     document.addEventListener('keydown', this.onKey.bind(this, true), false);
     document.addEventListener('keyup', this.onKey.bind(this, false), false);
-    document.addEventListener('touchstart', this.onTouch.bind(this), false);
-    document.addEventListener('touchmove', this.onTouch.bind(this), false);
-    document.addEventListener('touchend', this.onTouchEnd.bind(this), false);
+    document.addEventListener('mousemove', this.onMove.bind(this, true), false);
+    document.addEventListener('mouseout', this.onLeave.bind(this, true), false);
+    // document.addEventListener('touchstart', this.onTouch.bind(this), false);
+    // document.addEventListener('touchmove', this.onTouch.bind(this), false);
+    // document.addEventListener('touchend', this.onTouchEnd.bind(this), false);
+    document.body.onclick = document.body.requestPointerLock ||
+    document.body.mozRequestPointerLock ||
+    document.body.webkitRequestPointerLock;
 }
 
-Controls.prototype.onTouch = function(e) {
-    var t = e.touches[0];
-    this.onTouchEnd(e);
-    if (t.pageY < window.innerHeight * 0.5) this.onKey(true, {
-        keyCode: 38
-    });
-    else if (t.pageX < window.innerWidth * 0.5) this.onKey(true, {
-        keyCode: 37
-    });
-    else if (t.pageY > window.innerWidth * 0.5) this.onKey(true, {
-        keyCode: 39
-    });
-};
+// Controls.prototype.onTouch = function(e) {
+//     var t = e.touches[0];
+//     this.onTouchEnd(e);
+//     if (t.pageY < window.innerHeight * 0.5) this.onKey(true, {
+//         keyCode: 38
+//     });
+//     else if (t.pageX < window.innerWidth * 0.5) this.onKey(true, {
+//         keyCode: 37
+//     });
+//     else if (t.pageY > window.innerWidth * 0.5) this.onKey(true, {
+//         keyCode: 39
+//     });
+// };
 
-Controls.prototype.onTouchEnd = function(e) {
-    this.states = {
-        'left': false,
-        'right': false,
-        'forward': false,
-        'backward': false
-    };
-    e.preventDefault();
-    e.stopPropagation();
-};
+// Controls.prototype.onTouchEnd = function(e) {
+//     this.states = {
+//         'left': false,
+//         'right': false,
+//         'forward': false,
+//         'backward': false
+//     };
+//     e.preventDefault();
+//     e.stopPropagation();
+// };
 
 Controls.prototype.onKey = function(val, e) {
     var state = this.codes[e.keyCode];
@@ -54,6 +60,19 @@ Controls.prototype.onKey = function(val, e) {
     e.stopPropagation && e.stopPropagation();
 };
 
+Controls.prototype.onMove = function(val, e) {
+    var _x = e.movementX,
+        _y = e.movementY
+    if (_x<3 && _x>-3) _x=0;
+    if (_y<3 && _y>-3) _y=0;
+    this.states['look'] = [_x,_y]
+    console.log(this.states['look'])
+}
+
+Controls.prototype.onLeave = function(val, e) {
+    this.states['look'] = [0,0];
+}
+
 function Bitmap(src, width, height) {
     this.image = new Image();
     this.image.src = src;
@@ -61,10 +80,11 @@ function Bitmap(src, width, height) {
     this.height = height;
 }
 
-function Player(x, y, direction) {
+function Player(x, y, direction, lookHeight) {
     this.x = x;
     this.y = y;
     this.direction = direction;
+    this.lookHeight = lookHeight;
     // this.weapon = new Bitmap('assets/knife_hand.png', 319, 320);
     this.paces = 0;
 }
@@ -73,8 +93,11 @@ Player.prototype.rotate = function(angle) {
     this.direction = (this.direction + angle + CIRCLE) % (CIRCLE);
 };
 
-Player.prototype.rotate2 = function(angle) {
-    this.direction = (this.direction + angle + CIRCLE) % (CIRCLE);
+Player.prototype.look = function(angle) {
+    var _y = angle;
+    if (this.lookHeight <= 1) _y = angle/50;
+    if (this.lookHeight > 1) _y = angle/20;
+    this.lookHeight = this.lookHeight - _y;
 };
 
 Player.prototype.walk = function(distance, map) {
@@ -85,11 +108,20 @@ Player.prototype.walk = function(distance, map) {
     this.paces += distance;
 };
 
+Player.prototype.strafe = function(distance, map) {
+    var dx = Math.cos(this.direction - Math.PI/2) * distance;
+    var dy = Math.sin(this.direction - Math.PI/2) * distance;
+    if (map.get(this.x + dx, this.y) <= 0) this.x += dx;
+    if (map.get(this.x, this.y + dy) <= 0) this.y += dy;
+    this.paces += distance;
+};
+
 Player.prototype.update = function(controls, map, seconds) {
-    if (controls.left) this.rotate2(-Math.PI * seconds);
-    if (controls.right) this.rotate2(Math.PI * seconds);
-    // if (controls.left) this.rotate2(-Math.PI * seconds);
-    // if (controls.right) this.rotate2(Math.PI * seconds);
+    // if (controls.left) this.rotate(-Math.PI * seconds);
+    // if (controls.right) this.rotate(Math.PI * seconds);
+    if (controls.look) this.rotate(controls.look[0]/150), this.look(controls.look[1]);
+    if (controls.right) this.strafe(-3 * seconds, map);
+    if (controls.left) this.strafe(3 * seconds, map);
     if (controls.forward) this.walk(3 * seconds, map);
     if (controls.backward) this.walk(-3 * seconds, map);
 };
@@ -191,7 +223,7 @@ Camera.prototype.render = function(player, map) {
     // this.drawWeapon(player.weapon, player.paces);
 };
 
-var lookHeight = 1; // between 0 and 4
+ // between 0 and 4
 
 Camera.prototype.drawBackground = function(direction) {
     
@@ -199,7 +231,7 @@ Camera.prototype.drawBackground = function(direction) {
     this.ctx.fillStyle="#000000";
     this.ctx.fillRect(0,0,this.width,this.height);
     this.ctx.fillStyle="#bbbbff";
-    this.ctx.fillRect(0,0,this.width,this.height/2+(lookHeight*40));
+    this.ctx.fillRect(0,0,this.width,player.lookHeight*this.height/2);
     this.ctx.restore();
 
 }
@@ -209,10 +241,10 @@ Camera.prototype.drawSky = function(direction, sky, ambient) {
     var left = (direction / CIRCLE) * -width;
 
     this.ctx.save();
-    this.ctx.drawImage(sky.image, left, -400, width, 800+this.height*lookHeight);
+    this.ctx.drawImage(sky.image, left, -400, width, 800+this.height*player.lookHeight);
     if (left < width - this.width) {
         // this.ctx.drawImage(sky.image, left + width, 0, width, this.height); // look up/down here
-        this.ctx.drawImage(sky.image, left + width, -400, width, 800+this.height*lookHeight);
+        this.ctx.drawImage(sky.image, left + width, -400, width, 800+this.height*player.lookHeight);
     }
     if (ambient > 0) {
         this.ctx.fillStyle = '#ffffff';
@@ -278,7 +310,7 @@ Camera.prototype.drawColumn = function(column, ray, angle, map) {
 Camera.prototype.project = function(height, angle, distance) {
     var z = distance * Math.cos(angle)/3; // controls height too, can be used for look up/down
     var wallHeight = this.height * height / z;
-    var bottom = ((this.height / 2)-20) * (lookHeight + 1 / z);
+    var bottom = ((this.height / 2)-20) * (player.lookHeight + 1 / z);
     return {
         top: bottom - wallHeight,
         height: wallHeight
@@ -304,7 +336,7 @@ GameLoop.prototype.frame = function(time) {
 };
 
 var display = document.getElementById('display');
-var player = new Player(15.3, -1.2, Math.PI * 0.3);
+var player = new Player(15.3, -1.2, Math.PI * 0, 1);
 var map = new Map(32);
 var controls = new Controls();
 var camera = new Camera(display, MOBILE ? 160 : 320, .8);
