@@ -15,16 +15,42 @@ function Controls() {
         'backward': false,
         'look':[0,0]
     };
-    document.addEventListener('keydown', this.onKey.bind(this, true), false);
-    document.addEventListener('keyup', this.onKey.bind(this, false), false);
-    document.addEventListener('mousemove', this.onMove.bind(this, true), false);
-    document.addEventListener('mouseout', this.onLeave.bind(this, true), false);
+    // document.addEventListener('keydown', this.onKey.bind(this, true), false);
+    // document.addEventListener('keyup', this.onKey.bind(this, false), false);
+    
     // document.addEventListener('touchstart', this.onTouch.bind(this), false);
     // document.addEventListener('touchmove', this.onTouch.bind(this), false);
     // document.addEventListener('touchend', this.onTouchEnd.bind(this), false);
-    document.body.onclick = document.body.requestPointerLock ||
-    document.body.mozRequestPointerLock ||
-    document.body.webkitRequestPointerLock;
+    var canvas = document.querySelector('canvas');
+    canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock;
+
+    document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
+
+    canvas.onclick = function() {
+        canvas.requestPointerLock();
+    };
+
+    document.addEventListener('pointerlockchange', this.lockChangeAlert.bind(this), false);
+    document.addEventListener('mozpointerlockchange', this.lockChangeAlert.bind(this), false);
+
+    
+}
+var binds = [];
+Controls.prototype.lockChangeAlert = function(e) {
+    var canvas = document.querySelector('canvas');
+    if (document.pointerLockElement === canvas || document.mozPointerLockElement === canvas) {
+        binds = [this.onMove.bind(this, true),this.onLeave.bind(this, true),this.onKey.bind(this, true),this.onKey.bind(this, false)];
+        document.addEventListener('mousemove', binds[0], false);
+        document.addEventListener('mouseout', binds[1], false);
+        document.addEventListener('keydown', binds[2], false);
+        document.addEventListener('keyup', binds[3], false);
+    } 
+    else {
+        document.removeEventListener('mousemove', binds[0], false);
+        document.removeEventListener('mouseout', binds[1], false);
+        document.removeEventListener('keydown', binds[2], false);
+        document.removeEventListener('keyup', binds[3], false);
+    }
 }
 
 // Controls.prototype.onTouch = function(e) {
@@ -141,7 +167,7 @@ function Map(size, wallGrid) {
     this.size = size;
     this.wallGrid = wallGrid;
     this.skybox = new Bitmap('./assets/deathvalley_panorama.jpg', 2000, 750);
-    this.wallTexture = new Bitmap('./assets/wall_texture.jpg', 1024, 1024);
+    this.wallTexture = [0,new Bitmap('./assets/concrete.jpg', 1024, 1024),new Bitmap('./assets/brick.jpg', 1024, 1024),new Bitmap('./assets/green-wallpaper.jpg', 1024, 1024)];
     this.light = 0;
 }
 
@@ -198,7 +224,15 @@ Map.prototype.cast = function(point, angle, range) {
     function inspect(step, shiftX, shiftY, distance, offset) {
         var dx = cos < 0 ? shiftX : 0;
         var dy = sin < 0 ? shiftY : 0;
-        step.height = self.get(step.x - dx, step.y - dy);
+        // step.height = self.get(step.x - dx, step.y - dy); // this may get array number
+        if (self.get(step.x - dx, step.y - dy) > 0) {
+            step.height = 1;    
+        }
+        else {
+            step.height = 0;
+        }
+        step.whatami = self.get(step.x - dx, step.y - dy);
+        // step.height = self.get(step.x - dx, step.y - dy);
         step.distance = distance + Math.sqrt(step.length2);
         if (shiftX) step.shading = cos < 0 ? 2 : 0;
         else step.shading = sin < 0 ? 2 : 1;
@@ -291,23 +325,30 @@ Camera.prototype.drawColumn = function(column, ray, angle, map) {
     var width = Math.ceil(this.spacing);
     var hit = -1;
 
+
+
     while (++hit < ray.length && ray[hit].height <= 0);
 
     for (var s = ray.length - 1; s >= 0; s--) {
         var step = ray[s];
+
+
         // var rainDrops = Math.pow(Math.random(), 3) * s;
         // var rain = (rainDrops > 0) && this.project(0.1, angle, step.distance);
 
+
         if (s === hit) {
-            var textureX = Math.floor(texture.width * step.offset);
+            var what = parseInt(ray[hit].whatami);
+            var textureX = Math.floor(texture[what].width * step.offset);
             var wall = this.project(step.height, angle, step.distance);
 
             ctx.globalAlpha = 1;
-            ctx.drawImage(texture.image, textureX, 0, 1, texture.height, left, wall.top, width, wall.height); // draws wall sprite on wall
+            ctx.drawImage(texture[what].image, textureX, 0, 1, texture[what].height, left, wall.top, width, wall.height); // draws wall sprite on wall
 
             ctx.fillStyle = '#000000';
             ctx.globalAlpha = Math.max((step.distance + step.shading) / this.lightRange - map.light, 0);
-            ctx.fillRect(left, wall.top, width, wall.height);
+            ctx.fillRect(left, wall.top, width, wall.height);    
+            
         }
 
         ctx.fillStyle = '#ffffff';
