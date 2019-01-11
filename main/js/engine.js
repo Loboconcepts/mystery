@@ -135,9 +135,11 @@ Player.prototype.update = function(controls, map, seconds) {
     if (controls.backward) this.walk(-3 * seconds, map);
 };
 
-function Map(size) {
+// Map Function
+
+function Map(size, wallGrid) {
     this.size = size;
-    this.wallGrid = new Uint8Array(size * size);
+    this.wallGrid = wallGrid;
     this.skybox = new Bitmap('./assets/deathvalley_panorama.jpg', 2000, 750);
     this.wallTexture = new Bitmap('./assets/wall_texture.jpg', 1024, 1024);
     this.light = 0;
@@ -150,11 +152,11 @@ Map.prototype.get = function(x, y) {
     return this.wallGrid[y * this.size + x];
 };
 
-Map.prototype.randomize = function() {
-    for (var i = 0; i < this.size * this.size; i++) {
-        this.wallGrid[i] = Math.random() < 0.3 ? 1 : 0;
-    }
-};
+// Map.prototype.randomize = function() {
+//     for (var i = 0; i < this.size * this.size; i++) {
+//         this.wallGrid[i] = Math.random() < 0.3 ? 1 : 0;
+//     }
+// };
 
 Map.prototype.cast = function(point, angle, range) {
     var self = this;
@@ -344,17 +346,17 @@ GameLoop.prototype.frame = function(time) {
     requestAnimationFrame(this.frame);
 };
 
-var display = document.getElementById('display');
-var player = new Player(15.3, -1.2, Math.PI * 0, 1);
-var map = new Map(32);
-var controls = new Controls();
-var camera = new Camera(display, MOBILE ? 160 : 320, .8);
-var loop = new GameLoop();
+// var display = document.getElementById('display');
+// var player = new Player(15.3, -1.2, Math.PI * 0, 1);
+// var map = new Map(32);
+// var controls = new Controls();
+// var camera = new Camera(display, MOBILE ? 160 : 320, .8);
+// var loop = new GameLoop();
 
-map.randomize();
+// map.randomize();
 
-loop.start(function frame(seconds) {
-    map.update(seconds);
-    player.update(controls.states, map, seconds);
-    camera.render(player, map);
-});
+// loop.start(function frame(seconds) {
+//     map.update(seconds);
+//     player.update(controls.states, map, seconds);
+//     camera.render(player, map);
+// });

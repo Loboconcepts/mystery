@@ -5,7 +5,42 @@
 </head>
 <body style="background: #000; margin: 0; padding: 0; width: 100%; height: 100%;">
 	<canvas id="display" width="1" height="1" style="width: 100%; height: 100%;">
+
 	<script src="js/engine.js"></script>
+	<script type="text/javascript">
+		var display = document.getElementById('display');
+		var player = new Player(8, 16.9, -Math.PI * .5, 1);
+		var map = new Map(16, [
+			1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+			1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+			1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+			1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+			1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+			1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+			1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+			1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+			1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+			1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+			1,1,1,1,1,1,1,1,1,0,0,1,0,0,0,1,
+			1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,
+			1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,
+			1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,
+			1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,
+			1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1
+			]);
+		var controls = new Controls();
+		var camera = new Camera(display, MOBILE ? 160 : 320, .8);
+		var loop = new GameLoop();
+
+
+		loop.start(function frame(seconds) {
+		    map.update(seconds);
+		    player.update(controls.states, map, seconds);
+		    camera.render(player, map);
+		});
+
+
+	</script>
 
 </body>
 </html>
