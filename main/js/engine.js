@@ -61,12 +61,21 @@ Controls.prototype.onKey = function(val, e) {
 };
 
 Controls.prototype.onMove = function(val, e) {
+
+
+    
     var _x = e.movementX,
         _y = e.movementY
-    if (_x<3 && _x>-3) _x=0;
-    if (_y<3 && _y>-3) _y=0;
-    this.states['look'] = [_x,_y]
-    console.log(this.states['look'])
+    // if (_x<3 && _x>-3) _x=0;
+    // if (_y<3 && _y>-3) _y=0;
+    this.states['look'] = [_x,_y];
+    clearTimeout(timeout);
+
+    var timeout = setTimeout(function () {
+        controls.states['look'] = [0,0];
+    }, 100);
+
+    
 }
 
 Controls.prototype.onLeave = function(val, e) {
@@ -320,7 +329,7 @@ Camera.prototype.project = function(height, angle, distance) {
 function GameLoop() {
     this.frame = this.frame.bind(this);
     this.lastTime = 0;
-    this.callback = function() {console.log("do I do anything?")}; // this was an empty function
+    this.callback = function() {}; // this was an empty function
 }
 
 GameLoop.prototype.start = function(callback) {
