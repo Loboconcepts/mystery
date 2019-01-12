@@ -167,7 +167,12 @@ function Map(size, wallGrid) {
     this.size = size;
     this.wallGrid = wallGrid;
     this.skybox = new Bitmap('./assets/deathvalley_panorama.jpg', 2000, 750);
-    this.wallTexture = [0,new Bitmap('./assets/concrete.jpg', 1024, 1024),new Bitmap('./assets/brick.jpg', 1024, 1024),new Bitmap('./assets/green-wallpaper.jpg', 1024, 1024)];
+    this.wallTexture = [0,
+                        new Bitmap('./assets/concrete.jpg', 1024, 1024),
+                        new Bitmap('./assets/brick.jpg', 1024, 1024),
+                        new Bitmap('./assets/green-wallpaper.jpg', 1024, 1024),
+                        new Bitmap('./assets/wood-mid.jpg', 1024, 1024)
+                        ];
     this.light = 0;
 }
 
@@ -256,7 +261,7 @@ function Camera(canvas, resolution, focalLength) {
     this.spacing = this.width / resolution;
     this.focalLength = focalLength || 0.8;
     this.range = MOBILE ? 8 : 14;
-    this.lightRange = 10;
+    this.lightRange = 15;
     this.scale = (this.width + this.height) / 1200;
 }
 
@@ -347,9 +352,10 @@ Camera.prototype.drawColumn = function(column, ray, angle, map) {
 
             ctx.fillStyle = '#000000';
             ctx.globalAlpha = Math.max((step.distance + step.shading) / this.lightRange - map.light, 0);
-            ctx.fillRect(left, wall.top, width, wall.height);    
+            ctx.fillRect(left, wall.top, width, wall.height);  
             
         }
+        
 
         ctx.fillStyle = '#ffffff';
         ctx.globalAlpha = 0.15;
@@ -365,7 +371,8 @@ Camera.prototype.project = function(height, angle, distance) {
     var bottom = ((this.height / 2)-20) * (player.lookHeight + 1 / z);
     return {
         top: bottom - wallHeight,
-        height: wallHeight
+        height: wallHeight,
+        bottom : bottom
     };
 };
 
